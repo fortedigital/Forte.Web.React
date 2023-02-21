@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Packable>true</Packable>
+    <PackageVersion>0.1.0.0</PackageVersion>
+    <Version>0.1.0.0</Version>
+    <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
+    <NuspecProperties>Version=$(Version)</NuspecProperties>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jering.Javascript.NodeJS" Version="6.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="renderToString.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+</Project>
