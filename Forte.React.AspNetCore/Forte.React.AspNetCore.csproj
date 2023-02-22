@@ -18,9 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="renderToString.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <EmbeddedResource Include="renderToString.js" />
   </ItemGroup>
 
 </Project>
