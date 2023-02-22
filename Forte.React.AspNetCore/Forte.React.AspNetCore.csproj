@@ -13,7 +13,7 @@
     <Description>Library to render React library components on the server or client side with C#.</Description>
     <Authors>Forte_ Digital</Authors>
     <PackageProjectUrl>https://github.com/fortedigital/Forte.React.AspNetCore</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/fortedigital/Forte.React.AspNetCore/blob/master/Forte.React.AspNetCore/LICENSE</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <SignAssembly>false</SignAssembly>
     <RepositoryType>git</RepositoryType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -23,6 +23,10 @@
     <PackageReference Include="Jering.Javascript.NodeJS" Version="6.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="./LICENSE" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>
