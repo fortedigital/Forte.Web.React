@@ -45,6 +45,11 @@ public class ReactService : IReactService
         var component = new Component(componentName, props);
         Components.Add(component);
 
+        if (_config.IsServerSideDisabled)
+        {
+            return WrapRenderedStringComponent(string.Empty, component);
+        }
+
         var args = new[] { componentName, props, _config.ScriptUrls };
 
         var (success, cachedResult) =
