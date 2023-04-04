@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-	<TargetType>library</TargetType>
+    <TargetType>library</TargetType>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <Packable>true</Packable>
