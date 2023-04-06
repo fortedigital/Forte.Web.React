@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>net6.0;net461</TargetFrameworks>
+    <TargetType>library</TargetType>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <Packable>true</Packable>
@@ -21,16 +22,23 @@
 
   <ItemGroup>
     <PackageReference Include="Jering.Javascript.NodeJS" Version="6.3.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="./LICENSE" Pack="true" PackagePath=""/>
+    <None Include="./LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="renderToString.js" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <Reference Include="System.Web" />
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.9" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,8 @@
-﻿using System;
+﻿#if NET6_0_OR_GREATER
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Forte.React.AspNetCore.Configuration;
-using Forte.React.AspNetCore.Html;
 using Forte.React.AspNetCore.React;
 using Jering.Javascript.NodeJS;
 using Microsoft.AspNetCore.Builder;
@@ -34,7 +34,6 @@ public static class ReactForteExtensions
         {
             services.AddScoped(reactServiceFactory.Create);
         }
-        services.AddScoped<IHtmlService, HtmlService>();
     }
 
     public static void UseReact(this IApplicationBuilder app, IEnumerable<string> scriptUrls, Version reactVersion,
@@ -52,3 +51,4 @@ public static class ReactForteExtensions
         config.ReactVersion = reactVersion;
     }
 }
+#endif
