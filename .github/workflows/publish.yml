@@ -18,7 +18,7 @@ jobs:
       run: dotnet build -c Release
     - name: Pack nugets
       working-directory: ./Forte.React.AspNetCore
-      run: dotnet pack -c Release --no-build --output . --version-suffix "alpha"
+      run: dotnet pack -c Release --no-build --output . 
     - name: Push to NuGet
       working-directory: ./Forte.React.AspNetCore
       run: dotnet nuget push "*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json
