@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Forte.React.AspNetCore.Configuration;
 using Jering.Javascript.NodeJS;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Forte.React.AspNetCore.React;
 
@@ -24,20 +25,22 @@ public class ReactService : IReactService
     private readonly ReactConfiguration _config;
     private const string RenderToStringCacheIdentifier = nameof(RenderToStringAsync);
 
-    private readonly JsonSerializerOptions _serializeOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+    private readonly JsonSerializerOptions _serializeOptions;
 
     public static IReactService Create(IServiceProvider serviceProvider)
     {
-        return new ReactService(serviceProvider.GetRequiredService<INodeJSService>(), serviceProvider.GetRequiredService<ReactConfiguration>());
+        return new ReactService(
+            serviceProvider.GetRequiredService<INodeJSService>(),
+            serviceProvider.GetRequiredService<ReactConfiguration>(),
+            serviceProvider.GetRequiredService<IOptions<ReactJsonSerializerOptions>>());
     }
 
-    private ReactService(INodeJSService nodeJsService, ReactConfiguration config)
+    private ReactService(INodeJSService nodeJsService, ReactConfiguration config,
+        IOptions<ReactJsonSerializerOptions> serializeOptions)
     {
         _nodeJsService = nodeJsService;
         _config = config;
+        _serializeOptions = serializeOptions.Value.Options;
     }
 
     public async Task<string> RenderToStringAsync(string componentName, object props)
@@ -66,8 +69,8 @@ public class ReactService : IReactService
         Stream ModuleFactory()
         {
             return currentAssembly.GetManifestResourceStream(renderToStringScriptManifestName) ??
-                    throw new InvalidOperationException(
-                        $"Can not get manifest resource stream with name - {renderToStringScriptManifestName}");
+                   throw new InvalidOperationException(
+                       $"Can not get manifest resource stream with name - {renderToStringScriptManifestName}");
         }
 
         var result = await _nodeJsService.InvokeFromStreamAsync<string>(ModuleFactory,
