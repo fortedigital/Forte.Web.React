@@ -16,9 +16,9 @@ internal class JsonSerializationService : IJsonService
     }
 
     public ValueTask<T?> DeserializeAsync<T>(Stream stream,
-        CancellationToken cancellationToken = new CancellationToken())
+        CancellationToken cancellationToken = default)
         => JsonSerializer.DeserializeAsync<T>(stream, _jsonSerializerOptions, cancellationToken);
 
-    public Task SerializeAsync<T>(Stream stream, T value, CancellationToken cancellationToken = new CancellationToken())
+    public Task SerializeAsync<T>(Stream stream, T value, CancellationToken cancellationToken = default)
         => JsonSerializer.SerializeAsync(stream, value, _jsonSerializerOptions, cancellationToken);
 }

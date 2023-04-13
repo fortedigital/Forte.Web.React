@@ -4,7 +4,7 @@ namespace Forte.React.AspNetCore.Configuration;
 
 public class ReactJsonSerializerOptions
 {
-    public JsonSerializerOptions JsonSerializerOptions { get; } = new()
+    public JsonSerializerOptions Options { get; } = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };

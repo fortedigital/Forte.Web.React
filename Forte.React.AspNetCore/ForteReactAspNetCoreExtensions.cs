@@ -22,14 +22,14 @@ public static class ReactForteExtensions
         services.AddNodeJS();
         services.AddSingleton<IJsonService, JsonSerializationService>(
             sp => new JsonSerializationService(sp.GetRequiredService<IOptions<ReactJsonSerializerOptions>>().Value
-                .JsonSerializerOptions));
+                .Options));
 
         services.Configure<NodeJSProcessOptions>(options => { configureNodeJs?.Invoke(options); });
         services.Configure<OutOfProcessNodeJSServiceOptions>(options =>
         {
             configureOutOfProcessNodeJs?.Invoke(options);
         });
-        services.Configure<ReactJsonSerializerOptions>(options => configureJsonSerializerOptions?.Invoke(options.JsonSerializerOptions));
+        services.Configure<ReactJsonSerializerOptions>(options => configureJsonSerializerOptions?.Invoke(options.Options));
 
         services.AddSingleton<ReactConfiguration>();
         if (reactServiceFactory == null)

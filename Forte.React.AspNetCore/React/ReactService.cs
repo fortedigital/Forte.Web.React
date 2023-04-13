@@ -40,7 +40,7 @@ public class ReactService : IReactService
     {
         _nodeJsService = nodeJsService;
         _config = config;
-        _serializeOptions = serializeOptions.Value.JsonSerializerOptions;
+        _serializeOptions = serializeOptions.Value.Options;
     }
 
     public async Task<string> RenderToStringAsync(string componentName, object props)
