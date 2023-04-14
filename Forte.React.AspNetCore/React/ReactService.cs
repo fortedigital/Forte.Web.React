@@ -25,22 +25,17 @@ public class ReactService : IReactService
     private readonly ReactConfiguration _config;
     private const string RenderToStringCacheIdentifier = nameof(RenderToStringAsync);
 
-    private readonly JsonSerializerOptions _serializeOptions;
-
     public static IReactService Create(IServiceProvider serviceProvider)
     {
         return new ReactService(
             serviceProvider.GetRequiredService<INodeJSService>(),
-            serviceProvider.GetRequiredService<ReactConfiguration>(),
-            serviceProvider.GetRequiredService<IOptions<ReactJsonSerializerOptions>>());
+            serviceProvider.GetRequiredService<ReactConfiguration>());
     }
 
-    private ReactService(INodeJSService nodeJsService, ReactConfiguration config,
-        IOptions<ReactJsonSerializerOptions> serializeOptions)
+    private ReactService(INodeJSService nodeJsService, ReactConfiguration config)
     {
         _nodeJsService = nodeJsService;
         _config = config;
-        _serializeOptions = serializeOptions.Value.Options;
     }
 
     public async Task<string> RenderToStringAsync(string componentName, object props)
@@ -53,7 +48,7 @@ public class ReactService : IReactService
             return WrapRenderedStringComponent(string.Empty, component);
         }
 
-        var args = new[] { componentName, props, _config.ScriptUrls };
+        var args = new[] { componentName, component.JsonContainerId, props, _config.ScriptUrls };
 
         var (success, cachedResult) =
             await _nodeJsService.TryInvokeFromCacheAsync<string>(RenderToStringCacheIdentifier, args: args);
@@ -73,7 +68,8 @@ public class ReactService : IReactService
                        $"Can not get manifest resource stream with name - {renderToStringScriptManifestName}");
         }
 
-        var result = await _nodeJsService.InvokeFromStreamAsync<string>(ModuleFactory,
+        await using var stream = ModuleFactory();
+        var result = await _nodeJsService.InvokeFromStreamAsync<string>(stream,
             RenderToStringCacheIdentifier,
             args: args);
 
@@ -99,14 +95,12 @@ public class ReactService : IReactService
     }
 
     private static string GetElementById(string containerId)
-    {
-        return $"document.getElementById(\"{containerId}\")";
-    }
+        => $"document.getElementById(\"{containerId}\")";
+
 
     private string CreateElement(Component component)
-    {
-        return $"React.createElement({component.Name}, {JsonSerializer.Serialize(component.Props, _serializeOptions)})";
-    }
+        =>
+            $"React.createElement({component.Name}, JSON.parse(document.getElementById(\"{component.JsonContainerId}\").textContent))";
 
 
     private string Render(Component component)

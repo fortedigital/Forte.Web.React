@@ -1,13 +1,24 @@
-﻿module.exports = (callback, componentName, props = {}, scriptFiles) => {
-    scriptFiles.forEach((scriptFile) => { require(scriptFile) });
+﻿module.exports = (
+  callback,
+  componentName,
+  jsonContainerId,
+  props = {},
+  scriptFiles
+) => {
+  scriptFiles.forEach((scriptFile) => {
+    require(scriptFile);
+  });
+  const component = global[componentName];
 
-    const component = global[componentName];
+  const ReactDOMServer = global["ReactDOMServer"];
+  const React = global["React"];
+  const element = React.createElement(component, props);
 
-    const ReactDOMServer = global["ReactDOMServer"];
-    const React = global["React"];
-    const element = React.createElement(component, props);
+  const componentHtml = `${ReactDOMServer.renderToString(element)}`;
+  const jsonHtml = `<script id="${jsonContainerId}" type="json">${JSON.stringify(
+    props
+  )}</script>`;
+  const result = componentHtml + jsonHtml;
 
-    const result = ReactDOMServer.renderToString(element);
-
-    callback(null /* error */, result /* result */);
-}
+  callback(null /* error */, result /* result */);
+};
