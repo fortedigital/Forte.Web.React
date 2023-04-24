@@ -4,7 +4,7 @@
   jsonContainerId,
   props = {},
   scriptFiles,
-  objectToSavePropsName
+  nameOfObjectToSaveProps
 ) => {
   scriptFiles.forEach((scriptFile) => {
     require(scriptFile);
@@ -16,7 +16,7 @@
   const element = React.createElement(component, props);
 
   const componentHtml = `${ReactDOMServer.renderToString(element)}`;
-  const bootstrapScriptContent = `(window.${objectToSavePropsName} = window.${objectToSavePropsName} || {})['${jsonContainerId}'] = ${JSON.stringify(
+  const bootstrapScriptContent = `(window.${nameOfObjectToSaveProps} = window.${nameOfObjectToSaveProps} || {})['${jsonContainerId}'] = ${JSON.stringify(
     props
   )};`;
   const jsonHtml = `<script>${bootstrapScriptContent}</script>`;

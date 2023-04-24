@@ -12,7 +12,7 @@ module.exports = (
   jsonContainerId,
   props = {},
   scriptFiles,
-  objectToSavePropsName,
+  nameOfObjectToSaveProps,
   options,
 ) => {
   try {
@@ -38,7 +38,7 @@ module.exports = (
     }
 
     let error;
-    const bootstrapScriptContent = `(window.${objectToSavePropsName} = window.${objectToSavePropsName} || {})['${jsonContainerId}'] = ${JSON.stringify(
+    const bootstrapScriptContent = `(window.${objectToSavePropsName} = window.${nameOfObjectToSaveProps} || {})['${jsonContainerId}'] = ${JSON.stringify(
       props
     )};`;
 
@@ -72,9 +72,4 @@ module.exports = (
   } catch (err) {
     callback(err, null);
   }
-  // const componentHtml = `${ReactDOMServer.renderToString(element)}`;
-  // const jsonHtml = `<script id="${jsonContainerId}" type="json">${JSON.stringify(
-  //   props
-  // )}</script>`;
-  // const result = componentHtml + jsonHtml;
 };

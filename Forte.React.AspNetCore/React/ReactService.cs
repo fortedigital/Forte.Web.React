@@ -51,7 +51,7 @@ public class ReactService : IReactService
 
     private async Task<T> ASD<T>(Component component, object props, params object[] args)
     {
-        var allArgs = new List<object>() { component.Name, component.JsonContainerId, props, _config.ScriptUrls, _config.ObjectToSavePropsName };
+        var allArgs = new List<object>() { component.Name, component.JsonContainerId, props, _config.ScriptUrls, _config.NameOfObjectToSaveProps };
         allArgs.AddRange(args);
 
         var type = typeof(T);
@@ -150,7 +150,7 @@ public class ReactService : IReactService
 
     private string CreateElement(Component component)
         =>
-            $"React.createElement({component.Name}, window.{_config.ObjectToSavePropsName}[\"{component.JsonContainerId}\"])";
+            $"React.createElement({component.Name}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
 
 
     private string Render(Component component)

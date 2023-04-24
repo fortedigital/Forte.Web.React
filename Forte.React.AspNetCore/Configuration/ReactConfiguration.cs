@@ -8,5 +8,5 @@ internal class ReactConfiguration
     public List<string> ScriptUrls { get; set; } = new();
     public bool IsServerSideDisabled { get; set; } = false;
     public Version ReactVersion { get; set; } = null!;
-    public string ObjectToSavePropsName { get; set; } = "__reactProps";
+    public string NameOfObjectToSaveProps { get; set; } = "__reactProps";
 }
