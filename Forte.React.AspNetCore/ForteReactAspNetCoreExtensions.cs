@@ -29,7 +29,8 @@ public static class ReactForteExtensions
         {
             configureOutOfProcessNodeJs?.Invoke(options);
         });
-        services.Configure<ReactJsonSerializerOptions>(options => configureJsonSerializerOptions?.Invoke(options.Options));
+        services.Configure<ReactJsonSerializerOptions>(options =>
+            configureJsonSerializerOptions?.Invoke(options.Options));
 
         services.AddSingleton<ReactConfiguration>();
         if (reactServiceFactory == null)
@@ -43,7 +44,7 @@ public static class ReactForteExtensions
     }
 
     public static void UseReact(this IApplicationBuilder app, IEnumerable<string> scriptUrls, Version reactVersion,
-        bool disableServerSideRendering = false)
+        bool disableServerSideRendering = false, string? objectToSavePropsName = null)
     {
         var config = app.ApplicationServices.GetService<ReactConfiguration>();
 
@@ -55,5 +56,6 @@ public static class ReactForteExtensions
         config.IsServerSideDisabled = disableServerSideRendering;
         config.ScriptUrls = scriptUrls.ToList();
         config.ReactVersion = reactVersion;
+        config.ObjectToSavePropsName = objectToSavePropsName ?? config.ObjectToSavePropsName;
     }
 }

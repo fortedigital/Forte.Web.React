@@ -21,14 +21,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jering.Javascript.NodeJS" Version="6.3.1" />
+    <None Remove="renderToPipeableStream.js" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="./LICENSE" Pack="true" PackagePath=""/>
+    <PackageReference Include="Jering.Javascript.NodeJS" Version="7.0.0-beta.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="./LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="renderToPipeableStream.js" />
     <EmbeddedResource Include="renderToString.js" />
   </ItemGroup>
   
