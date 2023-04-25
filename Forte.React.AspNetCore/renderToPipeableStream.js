@@ -38,7 +38,7 @@ module.exports = (
     }
 
     let error;
-    const bootstrapScriptContent = `(window.${objectToSavePropsName} = window.${nameOfObjectToSaveProps} || {})['${jsonContainerId}'] = ${JSON.stringify(
+    const bootstrapScriptContent = `(window.${nameOfObjectToSaveProps} = window.${nameOfObjectToSaveProps} || {})['${jsonContainerId}'] = ${JSON.stringify(
       props
     )};`;
 

@@ -116,11 +116,13 @@ public class ReactService : IReactService
             writeOutputHtmlToOptions ?? new WriteOutputHtmlToOptions());
 
         using var reader = new StreamReader(await result.Content.ReadAsStreamAsync());
-        int character;
 
-        while ((character = reader.Read()) != -1)
+        char[] buffer = new char[1024];
+        int numChars;
+
+        while ((numChars = await reader.ReadAsync(buffer, 0, buffer.Length)) != 0)
         {
-            await writer.WriteAsync((char)character);
+            await writer.WriteAsync(buffer, 0, numChars);
         }
 
         await writer.WriteAsync("</div>");
