@@ -49,7 +49,7 @@ public class ReactService : IReactService
         _config = config;
     }
 
-    private async Task<T> ASD<T>(Component component, object props, params object[] args)
+    private async Task<T> InvokeRenderTo<T>(Component component, object props, params object[] args)
     {
         var allArgs = new List<object>() { component.Name, component.JsonContainerId, props, _config.ScriptUrls, _config.NameOfObjectToSaveProps };
         allArgs.AddRange(args);
@@ -94,7 +94,7 @@ public class ReactService : IReactService
             return WrapRenderedStringComponent(string.Empty, component);
         }
 
-        var result = await ASD<string>(component, props);
+        var result = await InvokeRenderTo<string>(component, props);
 
         return WrapRenderedStringComponent(result, component);
     }
@@ -112,7 +112,7 @@ public class ReactService : IReactService
             return;
         }
 
-        var result = await ASD<HttpResponseMessage>(component, props,
+        var result = await InvokeRenderTo<HttpResponseMessage>(component, props,
             writeOutputHtmlToOptions ?? new WriteOutputHtmlToOptions());
 
         using var reader = new StreamReader(await result.Content.ReadAsStreamAsync());
