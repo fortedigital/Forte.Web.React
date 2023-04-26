@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <Packable>true</Packable>
-    <VersionPrefix>0.1.1.0</VersionPrefix>
+    <VersionPrefix>0.1.2.0</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -21,14 +21,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jering.Javascript.NodeJS" Version="6.3.1" />
+    <PackageReference Include="Jering.Javascript.NodeJS" Version="7.0.0-beta.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="./LICENSE" Pack="true" PackagePath=""/>
+    <None Include="./LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="renderToPipeableStream.js" />
     <EmbeddedResource Include="renderToString.js" />
   </ItemGroup>
   

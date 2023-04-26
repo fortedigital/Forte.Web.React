@@ -2,18 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using Forte.React.AspNetCore.Configuration;
 using Jering.Javascript.NodeJS;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Forte.React.AspNetCore.React;
 
 public interface IReactService
 {
     Task<string> RenderToStringAsync(string componentName, object props);
+
+    Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object props,
+        WriteOutputHtmlToOptions? writeOutputHtmlToOptions = null);
+
     string GetInitJavascript();
 }
 
@@ -23,7 +29,12 @@ public class ReactService : IReactService
 
     private readonly INodeJSService _nodeJsService;
     private readonly ReactConfiguration _config;
-    private const string RenderToStringCacheIdentifier = nameof(RenderToStringAsync);
+
+    private static readonly Dictionary<Type, string> MethodToNodeJsScriptName = new()
+    {
+        { typeof(HttpResponseMessage), "renderToPipeableStream.js" },
+        { typeof(string), "renderToString.js" }
+    };
 
     public static IReactService Create(IServiceProvider serviceProvider)
     {
@@ -38,6 +49,41 @@ public class ReactService : IReactService
         _config = config;
     }
 
+    private async Task<T> InvokeRenderTo<T>(Component component, object props, params object[] args)
+    {
+        var allArgs = new List<object>() { component.Name, component.JsonContainerId, props, _config.ScriptUrls, _config.NameOfObjectToSaveProps };
+        allArgs.AddRange(args);
+
+        var type = typeof(T);
+        var nodeJsScriptName = MethodToNodeJsScriptName[type];
+
+        var (success, cachedResult) =
+            await _nodeJsService.TryInvokeFromCacheAsync<T>(nodeJsScriptName, args: allArgs.ToArray());
+
+        if (success)
+        {
+            return cachedResult!;
+        }
+
+        var currentAssembly = typeof(ReactService).Assembly;
+        var renderToStringScriptManifestName = currentAssembly.GetManifestResourceNames()
+            .Single(s => s == $"Forte.React.AspNetCore.{nodeJsScriptName}");
+
+        Stream ModuleFactory()
+        {
+            return currentAssembly.GetManifestResourceStream(renderToStringScriptManifestName) ??
+                   throw new InvalidOperationException(
+                       $"Can not get manifest resource stream with name - {renderToStringScriptManifestName}");
+        }
+
+        await using var stream = ModuleFactory();
+        var result = await _nodeJsService.InvokeFromStreamAsync<T>(stream,
+            nodeJsScriptName,
+            args: allArgs.ToArray());
+
+        return result!;
+    }
+
     public async Task<string> RenderToStringAsync(string componentName, object props)
     {
         var component = new Component(componentName, props);
@@ -48,32 +94,38 @@ public class ReactService : IReactService
             return WrapRenderedStringComponent(string.Empty, component);
         }
 
-        var args = new[] { componentName, component.JsonContainerId, props, _config.ScriptUrls };
-
-        var (success, cachedResult) =
-            await _nodeJsService.TryInvokeFromCacheAsync<string>(RenderToStringCacheIdentifier, args: args);
-
-        if (success)
-        {
-            return WrapRenderedStringComponent(cachedResult, component);
-        }
-
-        var currentAssembly = typeof(ReactService).Assembly;
-        var renderToStringScriptManifestName = currentAssembly.GetManifestResourceNames().Single();
-
-        Stream ModuleFactory()
-        {
-            return currentAssembly.GetManifestResourceStream(renderToStringScriptManifestName) ??
-                   throw new InvalidOperationException(
-                       $"Can not get manifest resource stream with name - {renderToStringScriptManifestName}");
-        }
-
-        await using var stream = ModuleFactory();
-        var result = await _nodeJsService.InvokeFromStreamAsync<string>(stream,
-            RenderToStringCacheIdentifier,
-            args: args);
+        var result = await InvokeRenderTo<string>(component, props);
 
         return WrapRenderedStringComponent(result, component);
+    }
+
+    public async Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object props,
+        WriteOutputHtmlToOptions? writeOutputHtmlToOptions)
+    {
+        var component = new Component(componentName, props);
+        Components.Add(component);
+
+        await writer.WriteAsync($"<div id=\"{component.ContainerId}\">");
+
+        if (_config.IsServerSideDisabled)
+        {
+            return;
+        }
+
+        var result = await InvokeRenderTo<HttpResponseMessage>(component, props,
+            writeOutputHtmlToOptions ?? new WriteOutputHtmlToOptions());
+
+        using var reader = new StreamReader(await result.Content.ReadAsStreamAsync());
+
+        char[] buffer = new char[1024];
+        int numChars;
+
+        while ((numChars = await reader.ReadAsync(buffer, 0, buffer.Length)) != 0)
+        {
+            await writer.WriteAsync(buffer, 0, numChars);
+        }
+
+        await writer.WriteAsync("</div>");
     }
 
     private static string WrapRenderedStringComponent(string? renderedStringComponent, Component component)
@@ -100,7 +152,7 @@ public class ReactService : IReactService
 
     private string CreateElement(Component component)
         =>
-            $"React.createElement({component.Name}, JSON.parse(document.getElementById(\"{component.JsonContainerId}\").textContent))";
+            $"React.createElement({component.Name}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
 
 
     private string Render(Component component)
@@ -117,3 +169,5 @@ public class ReactService : IReactService
             : $"ReactDOMClient.hydrateRoot({GetElementById(component.ContainerId)}, {CreateElement(component)});";
     }
 }
+
+public record WriteOutputHtmlToOptions(bool ServerOnly = false, bool EnableStreaming = true);
