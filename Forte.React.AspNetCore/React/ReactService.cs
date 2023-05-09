@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,9 +12,9 @@ namespace Forte.React.AspNetCore.React;
 
 public interface IReactService
 {
-    Task<string> RenderToStringAsync(string componentName, object props, bool clientOnly = false);
+    Task<string> RenderToStringAsync(string componentName, object? props = null, bool clientOnly = false);
 
-    Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object props,
+    Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object? props = null,
         WriteOutputHtmlToOptions? writeOutputHtmlToOptions = null);
 
     string GetInitJavascript();
@@ -48,7 +48,7 @@ public class ReactService : IReactService
         _jsonService = jsonService;
     }
 
-    private async Task<T> InvokeRenderTo<T>(Component component, object props, params object[] args)
+    private async Task<T> InvokeRenderTo<T>(Component component, object? props = null, params object[] args)
     {
         var allArgs = new List<object>()
         {
@@ -82,7 +82,7 @@ public class ReactService : IReactService
                        $"Can not get manifest resource stream with name - {renderToStringScriptManifestName}");
         }
 
-        await using var stream = ModuleFactory();
+        using var stream = ModuleFactory();
         var result = await _nodeJsService.InvokeFromStreamAsync<T>(stream,
             nodeJsScriptName,
             args: allArgs.ToArray());
@@ -90,7 +90,7 @@ public class ReactService : IReactService
         return result!;
     }
 
-    public async Task<string> RenderToStringAsync(string componentName, object props, bool clientOnly = false)
+    public async Task<string> RenderToStringAsync(string componentName, object? props = null, bool clientOnly = false)
     {
         var component = new Component(componentName, props, clientOnly);
         Components.Add(component);
@@ -105,8 +105,8 @@ public class ReactService : IReactService
         return WrapRenderedStringComponent(result, component);
     }
 
-    public async Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object props,
-        WriteOutputHtmlToOptions? writeOutputHtmlToOptions)
+    public async Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object? props = null,
+        WriteOutputHtmlToOptions? writeOutputHtmlToOptions = null)
     {
         var component = new Component(componentName, props);
         Components.Add(component);
@@ -163,7 +163,7 @@ public class ReactService : IReactService
 
     private string CreateElement(Component component)
         =>
-            $"React.createElement({component.Name}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
+            $"React.createElement({component.Path}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
 
 
     private string Render(Component component)
@@ -183,4 +183,14 @@ public class ReactService : IReactService
     }
 }
 
-public record WriteOutputHtmlToOptions(bool ServerOnly = false, bool EnableStreaming = true);
+public class WriteOutputHtmlToOptions
+{
+    public WriteOutputHtmlToOptions(bool serverOnly = false, bool enableStreaming = true)
+    {
+        this.ServerOnly = serverOnly;
+        this.EnableStreaming = enableStreaming;
+    }
+
+    public bool ServerOnly { get; }
+    public bool EnableStreaming { get; }
+}
