@@ -9,7 +9,12 @@
   scriptFiles.forEach((scriptFile) => {
     require(scriptFile);
   });
-  const component = global[componentName];
+  const path = componentName.split(".");
+  let component = global[path[0]];
+
+  for (let segment = 1; segment < path.length; segment++) {
+    component = component[path[segment]];
+  }
 
   const ReactDOMServer = global["ReactDOMServer"];
   const React = global["React"];
