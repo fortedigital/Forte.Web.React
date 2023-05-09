@@ -73,8 +73,9 @@ public class ReactService : IReactService
         var type = typeof(T);
         var nodeJsScriptName = MethodToNodeJsScriptName[type];
 
-        var (success, cachedResult) =
-            await _nodeJsService.TryInvokeFromCacheAsync<T>(nodeJsScriptName, args: allArgs.ToArray());
+        var (success, cachedResult) = await _nodeJsService
+            .TryInvokeFromCacheAsync<T>(nodeJsScriptName, args: allArgs.ToArray())
+            .ConfigureAwait(false);
 
         if (success)
         {
@@ -95,7 +96,8 @@ public class ReactService : IReactService
         using var stream = ModuleFactory();
         var result = await _nodeJsService.InvokeFromStreamAsync<T>(stream,
             nodeJsScriptName,
-            args: allArgs.ToArray());
+            args: allArgs.ToArray())
+            .ConfigureAwait(false);;
 
         return result!;
     }
@@ -110,7 +112,7 @@ public class ReactService : IReactService
             return WrapRenderedStringComponent(string.Empty, component);
         }
 
-        var result = await InvokeRenderTo<string>(component, props);
+        var result = await InvokeRenderTo<string>(component, props).ConfigureAwait(false);;
 
         return WrapRenderedStringComponent(result, component);
     }
@@ -121,7 +123,7 @@ public class ReactService : IReactService
         var component = new Component(componentName, props);
         Components.Add(component);
 
-        await writer.WriteAsync($"<div id=\"{component.ContainerId}\">");
+        await writer.WriteAsync($"<div id=\"{component.ContainerId}\">").ConfigureAwait(false);;
 
         if (_config.IsServerSideDisabled)
         {
@@ -129,19 +131,19 @@ public class ReactService : IReactService
         }
 
         var result = await InvokeRenderTo<HttpResponseMessage>(component, props,
-            writeOutputHtmlToOptions ?? new WriteOutputHtmlToOptions());
+            writeOutputHtmlToOptions ?? new WriteOutputHtmlToOptions()).ConfigureAwait(false);;
 
-        using var reader = new StreamReader(await result.Content.ReadAsStreamAsync());
+        using var reader = new StreamReader(await result.Content.ReadAsStreamAsync().ConfigureAwait(false));
 
         char[] buffer = new char[1024];
         int numChars;
 
-        while ((numChars = await reader.ReadAsync(buffer, 0, buffer.Length)) != 0)
+        while ((numChars = await reader.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) != 0)
         {
-            await writer.WriteAsync(buffer, 0, numChars);
+            await writer.WriteAsync(buffer, 0, numChars).ConfigureAwait(false);;
         }
 
-        await writer.WriteAsync("</div>");
+        await writer.WriteAsync("</div>").ConfigureAwait(false);
     }
 
     private static string WrapRenderedStringComponent(string? renderedStringComponent, Component component)

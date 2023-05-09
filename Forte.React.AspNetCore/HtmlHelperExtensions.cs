@@ -1,7 +1,6 @@
 ﻿using Forte.React.AspNetCore.React;
 using Microsoft.Extensions.DependencyInjection;
 
-
 #if NET48
 using System.Web.Mvc;
 using System.Web;
@@ -21,7 +20,7 @@ public static class HtmlHelperExtensions
     public static IHtmlString React<T>(this HtmlHelper _, string componentName, T props)
     {
         var reactService = DependencyResolver.Current.GetService<IReactService>();
-        var renderedComponent = reactService.RenderToStringAsync(componentName, props).Result;
+        var renderedComponent = reactService.RenderToStringAsync(componentName, props).GetAwaiter().GetResult();
 
         return new HtmlString(renderedComponent);
     }
@@ -29,7 +28,7 @@ public static class HtmlHelperExtensions
     public static IHtmlString React<TComponent>(this HtmlHelper _, TComponent component) where TComponent : IReactComponent
     {
         var reactService = DependencyResolver.Current.GetService<IReactService>();
-        var renderedComponent = reactService.RenderToStringAsync(component.Path, null, component.ClientOnly).Result;
+        var renderedComponent = reactService.RenderToStringAsync(component.Path, null, component.ClientOnly).GetAwaiter().GetResult();
 
         return new HtmlString(renderedComponent);
     }
@@ -37,7 +36,7 @@ public static class HtmlHelperExtensions
     public static IHtmlString React<TComponent, TProps>(this HtmlHelper _, TComponent component) where TComponent : IReactComponent<TProps> where TProps : IReactComponentProps
     {
         var reactService = DependencyResolver.Current.GetService<IReactService>();
-        var renderedComponent = reactService.RenderToStringAsync(component.Path, component.Props, component.ClientOnly).Result;
+        var renderedComponent = reactService.RenderToStringAsync(component.Path, component.Props, component.ClientOnly).GetAwaiter().GetResult();
 
         return new HtmlString(renderedComponent);
     }
