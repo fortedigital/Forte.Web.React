@@ -1,6 +1,7 @@
 ﻿using Forte.React.AspNetCore.React;
 using Microsoft.Extensions.DependencyInjection;
 
+
 #if NET48
 using System.Web.Mvc;
 using System.Web;
@@ -16,39 +17,37 @@ namespace Forte.React.AspNetCore;
 
 public static class HtmlHelperExtensions
 {
-
 #if NET48
-    public static IHtmlString React<T>(this HtmlHelper<dynamic> htmlHelper, string componentName, T props)
+    public static IHtmlString React<T>(this HtmlHelper _, string componentName, T props)
     {
-        var reactService = htmlHelper.ViewContext.HttpContext.GetRequiredService<IReactService>();
+        var reactService = DependencyResolver.Current.GetService<IReactService>();
         var renderedComponent = reactService.RenderToStringAsync(componentName, props).Result;
 
         return new HtmlString(renderedComponent);
     }
     
-    public static IHtmlString React<TComponent>(this HtmlHelper<dynamic> htmlHelper, TComponent component) where TComponent : IReactComponent
+    public static IHtmlString React<TComponent>(this HtmlHelper _, TComponent component) where TComponent : IReactComponent
     {
-        var reactService = htmlHelper.ViewContext.HttpContext.GetRequiredService<IReactService>();
+        var reactService = DependencyResolver.Current.GetService<IReactService>();
         var renderedComponent = reactService.RenderToStringAsync(component.Path, null, component.ClientOnly).Result;
 
         return new HtmlString(renderedComponent);
     }
     
-    public static IHtmlString React<TComponent, TProps>(this HtmlHelper<dynamic> htmlHelper, TComponent component) where TComponent : IReactComponent<TProps> where TProps : IReactComponentProps
+    public static IHtmlString React<TComponent, TProps>(this HtmlHelper _, TComponent component) where TComponent : IReactComponent<TProps> where TProps : IReactComponentProps
     {
-        var reactService = htmlHelper.ViewContext.HttpContext.GetRequiredService<IReactService>();
+        var reactService = DependencyResolver.Current.GetService<IReactService>();
         var renderedComponent = reactService.RenderToStringAsync(component.Path, component.Props, component.ClientOnly).Result;
 
         return new HtmlString(renderedComponent);
     }
 
-    public static IHtmlString InitJavascript(this HtmlHelper<dynamic> htmlHelper)
+    public static IHtmlString InitJavascript(this HtmlHelper _)
     {
-        var reactService = htmlHelper.ViewContext.HttpContext.GetRequiredService<IReactService>();
+        var reactService = DependencyResolver.Current.GetService<IReactService>();
 
         return new HtmlString(reactService.GetInitJavascript());
     }
-
 #endif
 
 #if NET6_0_OR_GREATER
