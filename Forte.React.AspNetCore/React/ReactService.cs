@@ -33,6 +33,7 @@ public class ReactService : IReactService
         { typeof(HttpResponseMessage), "renderToPipeableStream.js" }, { typeof(string), "renderToString.js" }
     };
 
+#if NET6_0_OR_GREATER
     public static IReactService Create(IServiceProvider serviceProvider)
     {
         return new ReactService(
@@ -47,6 +48,15 @@ public class ReactService : IReactService
         _config = config;
         _jsonService = jsonService;
     }
+#endif
+    
+#if NET48
+    public ReactService(INodeJSService nodeJsService, ReactConfiguration config)
+    {
+        _nodeJsService = nodeJsService;
+        _config = config;
+    }
+#endif
 
     private async Task<T> InvokeRenderTo<T>(Component component, object? props = null, params object[] args)
     {
