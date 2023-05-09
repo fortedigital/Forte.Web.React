@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Forte.React.AspNetCore.Configuration;
 using Jering.Javascript.NodeJS;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Forte.React.AspNetCore.React;
 
 public interface IReactService
 {
-    Task<string> RenderToStringAsync(string componentName, object props);
+    Task<string> RenderToStringAsync(string componentName, object props, bool clientOnly = false);
 
     Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object props,
         WriteOutputHtmlToOptions? writeOutputHtmlToOptions = null);
@@ -93,12 +90,12 @@ public class ReactService : IReactService
         return result!;
     }
 
-    public async Task<string> RenderToStringAsync(string componentName, object props)
+    public async Task<string> RenderToStringAsync(string componentName, object props, bool clientOnly = false)
     {
-        var component = new Component(componentName, props);
+        var component = new Component(componentName, props, clientOnly);
         Components.Add(component);
 
-        if (_config.IsServerSideDisabled)
+        if (_config.IsServerSideDisabled || clientOnly)
         {
             return WrapRenderedStringComponent(string.Empty, component);
         }
@@ -149,8 +146,13 @@ public class ReactService : IReactService
 
     public string GetInitJavascript()
     {
-        Func<Component, string> initFunction = _config.IsServerSideDisabled ? Render : Hydrate;
-        var componentInitiation = Components.Select(initFunction);
+        string InitFunction(Component c)
+        {
+            var shouldHydrate = !_config.IsServerSideDisabled && !c.ClientOnly;
+            return shouldHydrate ? Hydrate(c) : Render(c);
+        }
+
+        var componentInitiation = Components.Select(InitFunction);
 
         return $"<script>{string.Join("", componentInitiation)}</script>";
     }

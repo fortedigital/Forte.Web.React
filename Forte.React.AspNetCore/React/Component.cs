@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Forte.React.AspNetCore.React;
 
@@ -9,8 +9,9 @@ internal class Component
     public object Props { get; }
     public string ContainerId { get; }
     public string JsonContainerId { get; }
+    public bool ClientOnly { get; }
 
-    public Component(string name, object props)
+    public Component(string name, object props, bool clientOnly = false)
     {
         Name = name;
         Props = props;
