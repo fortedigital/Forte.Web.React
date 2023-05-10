@@ -23,6 +23,9 @@ public static class ReactForteExtensions
         services.AddSingleton<IJsonService, JsonSerializationService>(
             sp => new JsonSerializationService(sp.GetRequiredService<IOptions<ReactJsonSerializerOptions>>().Value
                 .Options));
+        services.AddSingleton<IJsonSerializationService, JsonSerializationService>(
+            sp => new JsonSerializationService(sp.GetRequiredService<IOptions<ReactJsonSerializerOptions>>().Value
+                .Options));
 
         services.Configure<NodeJSProcessOptions>(options => { configureNodeJs?.Invoke(options); });
         services.Configure<OutOfProcessNodeJSServiceOptions>(options =>

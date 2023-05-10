@@ -29,29 +29,38 @@ public class ReactService : IReactService
 
     private readonly INodeJSService _nodeJsService;
     private readonly ReactConfiguration _config;
+    private readonly IJsonSerializationService _jsonService;
 
     private static readonly Dictionary<Type, string> MethodToNodeJsScriptName = new()
     {
-        { typeof(HttpResponseMessage), "renderToPipeableStream.js" },
-        { typeof(string), "renderToString.js" }
+        { typeof(HttpResponseMessage), "renderToPipeableStream.js" }, { typeof(string), "renderToString.js" }
     };
 
     public static IReactService Create(IServiceProvider serviceProvider)
     {
         return new ReactService(
             serviceProvider.GetRequiredService<INodeJSService>(),
-            serviceProvider.GetRequiredService<ReactConfiguration>());
+            serviceProvider.GetRequiredService<ReactConfiguration>(),
+            serviceProvider.GetRequiredService<IJsonSerializationService>());
     }
 
-    private ReactService(INodeJSService nodeJsService, ReactConfiguration config)
+    private ReactService(INodeJSService nodeJsService, ReactConfiguration config, IJsonSerializationService jsonService)
     {
         _nodeJsService = nodeJsService;
         _config = config;
+        _jsonService = jsonService;
     }
 
     private async Task<T> InvokeRenderTo<T>(Component component, object props, params object[] args)
     {
-        var allArgs = new List<object>() { component.Name, component.JsonContainerId, props, _config.ScriptUrls, _config.NameOfObjectToSaveProps };
+        var allArgs = new List<object>()
+        {
+            component.Name,
+            component.JsonContainerId,
+            props,
+            _config.ScriptUrls,
+            _config.NameOfObjectToSaveProps
+        };
         allArgs.AddRange(args);
 
         var type = typeof(T);
@@ -157,9 +166,11 @@ public class ReactService : IReactService
 
     private string Render(Component component)
     {
-        return _config.ReactVersion.Major < 18
+        var bootstrapScript = $"(window.{_config.NameOfObjectToSaveProps} = window.{_config.NameOfObjectToSaveProps} || {{}})[\"{component.JsonContainerId}\"] = {_jsonService.Serialize(component.Props)};";
+
+        return bootstrapScript + (_config.ReactVersion.Major < 18
             ? $"ReactDOM.render({CreateElement(component)}, {GetElementById(component.ContainerId)});"
-            : $"ReactDOMClient.createRoot({GetElementById(component.ContainerId)}).render({CreateElement(component)});";
+            : $"ReactDOMClient.createRoot({GetElementById(component.ContainerId)}).render({CreateElement(component)});");
     }
 
     private string Hydrate(Component component)
