@@ -73,13 +73,16 @@ public class ReactService : IReactService
         var type = typeof(T);
         var nodeJsScriptName = MethodToNodeJsScriptName[type];
 
-        var (success, cachedResult) = await _nodeJsService
-            .TryInvokeFromCacheAsync<T>(nodeJsScriptName, args: allArgs.ToArray())
-            .ConfigureAwait(false);
-
-        if (success)
+        if (_config.UseCache)
         {
-            return cachedResult!;
+            var (success, cachedResult) = await _nodeJsService
+                .TryInvokeFromCacheAsync<T>(nodeJsScriptName, args: allArgs.ToArray())
+                .ConfigureAwait(false);
+
+            if (success)
+            {
+                return cachedResult!;
+            }
         }
 
         var currentAssembly = typeof(ReactService).Assembly;

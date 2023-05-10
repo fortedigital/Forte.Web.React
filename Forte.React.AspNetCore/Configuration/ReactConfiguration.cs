@@ -9,4 +9,5 @@ public class ReactConfiguration
     public bool IsServerSideDisabled { get; set; } = false;
     public Version ReactVersion { get; set; } = null!;
     public string NameOfObjectToSaveProps { get; set; } = "__reactProps";
+    public bool UseCache { get; set; } = true;
 }
