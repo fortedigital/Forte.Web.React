@@ -48,7 +48,7 @@ public static class ReactForteExtensions
     }
 
     public static void UseReact(this IApplicationBuilder app, IEnumerable<string> scriptUrls, Version reactVersion,
-        bool disableServerSideRendering = false, string? nameOfObjectToSaveProps = null, bool? useCache = null)
+        bool disableServerSideRendering = false, string? nameOfObjectToSaveProps = null, bool? useCache = null, bool? strictMode = null)
     {
         var config = app.ApplicationServices.GetService<ReactConfiguration>();
 
@@ -62,6 +62,7 @@ public static class ReactForteExtensions
         config.ReactVersion = reactVersion;
         config.NameOfObjectToSaveProps = nameOfObjectToSaveProps ?? config.NameOfObjectToSaveProps;
         config.UseCache = useCache ?? true;
+        config.StrictMode = strictMode ?? false;
     }
 }
 #endif

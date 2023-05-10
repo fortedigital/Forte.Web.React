@@ -10,4 +10,5 @@ public class ReactConfiguration
     public Version ReactVersion { get; set; } = null!;
     public string NameOfObjectToSaveProps { get; set; } = "__reactProps";
     public bool UseCache { get; set; } = true;
+    public bool StrictMode { get; set; } = false;
 }
