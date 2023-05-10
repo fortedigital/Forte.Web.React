@@ -55,6 +55,7 @@ public class ReactService : IReactService
     {
         _nodeJsService = nodeJsService;
         _config = config;
+        _jsonService = new JsonSerializationService(new ReactJsonSerializerOptions().Options);
     }
 #endif
 
