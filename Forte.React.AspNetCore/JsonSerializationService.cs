@@ -1,7 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Jering.Javascript.NodeJS;
@@ -13,7 +11,7 @@ internal interface IJsonSerializationService : IJsonService
     string Serialize<TValue>(TValue value);
 }
 
-internal class JsonSerializationService : IJsonSerializationService, IJsonService
+internal class JsonSerializationService : IJsonSerializationService
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 

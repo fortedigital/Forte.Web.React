@@ -1,23 +1,20 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Forte.React.AspNetCore.Configuration;
 using Jering.Javascript.NodeJS;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Forte.React.AspNetCore.React;
 
 public interface IReactService
 {
-    Task<string> RenderToStringAsync(string componentName, object props);
+    Task<string> RenderToStringAsync(string componentName, object? props = null, bool clientOnly = false);
 
-    Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object props,
+    Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object? props = null,
         WriteOutputHtmlToOptions? writeOutputHtmlToOptions = null);
 
     string GetInitJavascript();
@@ -36,6 +33,7 @@ public class ReactService : IReactService
         { typeof(HttpResponseMessage), "renderToPipeableStream.js" }, { typeof(string), "renderToString.js" }
     };
 
+#if NET6_0_OR_GREATER
     public static IReactService Create(IServiceProvider serviceProvider)
     {
         return new ReactService(
@@ -50,28 +48,42 @@ public class ReactService : IReactService
         _config = config;
         _jsonService = jsonService;
     }
+#endif
+    
+#if NET48
+    public ReactService(INodeJSService nodeJsService, ReactConfiguration config)
+    {
+        _nodeJsService = nodeJsService;
+        _config = config;
+        _jsonService = new JsonSerializationService(new ReactJsonSerializerOptions().Options);
+    }
+#endif
 
-    private async Task<T> InvokeRenderTo<T>(Component component, object props, params object[] args)
+    private async Task<T> InvokeRenderTo<T>(Component component, object? props = null, params object[] args)
     {
         var allArgs = new List<object>()
         {
-            component.Name,
+            component.Path,
             component.JsonContainerId,
             props,
             _config.ScriptUrls,
-            _config.NameOfObjectToSaveProps
+            _config.NameOfObjectToSaveProps,
         };
         allArgs.AddRange(args);
 
         var type = typeof(T);
         var nodeJsScriptName = MethodToNodeJsScriptName[type];
 
-        var (success, cachedResult) =
-            await _nodeJsService.TryInvokeFromCacheAsync<T>(nodeJsScriptName, args: allArgs.ToArray());
-
-        if (success)
+        if (_config.UseCache)
         {
-            return cachedResult!;
+            var (success, cachedResult) = await _nodeJsService
+                .TryInvokeFromCacheAsync<T>(nodeJsScriptName, args: allArgs.ToArray())
+                .ConfigureAwait(false);
+
+            if (success)
+            {
+                return cachedResult!;
+            }
         }
 
         var currentAssembly = typeof(ReactService).Assembly;
@@ -85,36 +97,37 @@ public class ReactService : IReactService
                        $"Can not get manifest resource stream with name - {renderToStringScriptManifestName}");
         }
 
-        await using var stream = ModuleFactory();
+        using var stream = ModuleFactory();
         var result = await _nodeJsService.InvokeFromStreamAsync<T>(stream,
             nodeJsScriptName,
-            args: allArgs.ToArray());
+            args: allArgs.ToArray())
+            .ConfigureAwait(false);
 
         return result!;
     }
 
-    public async Task<string> RenderToStringAsync(string componentName, object props)
+    public async Task<string> RenderToStringAsync(string componentName, object? props = null, bool clientOnly = false)
     {
-        var component = new Component(componentName, props);
+        var component = new Component(componentName, props, clientOnly);
         Components.Add(component);
 
-        if (_config.IsServerSideDisabled)
+        if (_config.IsServerSideDisabled || clientOnly)
         {
             return WrapRenderedStringComponent(string.Empty, component);
         }
 
-        var result = await InvokeRenderTo<string>(component, props);
+        var result = await InvokeRenderTo<string>(component, props).ConfigureAwait(false);
 
         return WrapRenderedStringComponent(result, component);
     }
 
-    public async Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object props,
-        WriteOutputHtmlToOptions? writeOutputHtmlToOptions)
+    public async Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object? props = null,
+        WriteOutputHtmlToOptions? writeOutputHtmlToOptions = null)
     {
         var component = new Component(componentName, props);
         Components.Add(component);
 
-        await writer.WriteAsync($"<div id=\"{component.ContainerId}\">");
+        await writer.WriteAsync($"<div id=\"{component.ContainerId}\">").ConfigureAwait(false);
 
         if (_config.IsServerSideDisabled)
         {
@@ -122,19 +135,19 @@ public class ReactService : IReactService
         }
 
         var result = await InvokeRenderTo<HttpResponseMessage>(component, props,
-            writeOutputHtmlToOptions ?? new WriteOutputHtmlToOptions());
+            writeOutputHtmlToOptions ?? new WriteOutputHtmlToOptions()).ConfigureAwait(false);
 
-        using var reader = new StreamReader(await result.Content.ReadAsStreamAsync());
+        using var reader = new StreamReader(await result.Content.ReadAsStreamAsync().ConfigureAwait(false));
 
         char[] buffer = new char[1024];
         int numChars;
 
-        while ((numChars = await reader.ReadAsync(buffer, 0, buffer.Length)) != 0)
+        while ((numChars = await reader.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) != 0)
         {
-            await writer.WriteAsync(buffer, 0, numChars);
+            await writer.WriteAsync(buffer, 0, numChars).ConfigureAwait(false);
         }
 
-        await writer.WriteAsync("</div>");
+        await writer.WriteAsync("</div>").ConfigureAwait(false);
     }
 
     private static string WrapRenderedStringComponent(string? renderedStringComponent, Component component)
@@ -149,8 +162,13 @@ public class ReactService : IReactService
 
     public string GetInitJavascript()
     {
-        Func<Component, string> initFunction = _config.IsServerSideDisabled ? Render : Hydrate;
-        var componentInitiation = Components.Select(initFunction);
+        string InitFunction(Component c)
+        {
+            var shouldHydrate = !_config.IsServerSideDisabled && !c.ClientOnly;
+            return shouldHydrate ? Hydrate(c) : Render(c);
+        }
+
+        var componentInitiation = Components.Select(InitFunction);
 
         return $"<script>{string.Join("", componentInitiation)}</script>";
     }
@@ -158,27 +176,38 @@ public class ReactService : IReactService
     private static string GetElementById(string containerId)
         => $"document.getElementById(\"{containerId}\")";
 
-
     private string CreateElement(Component component)
-        =>
-            $"React.createElement({component.Name}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
+    {
+        var element = $"React.createElement({component.Path}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
 
+        return _config.StrictMode ? $"React.createElement(React.StrictMode, null, {element})" : element;
+    }
 
     private string Render(Component component)
     {
         var bootstrapScript = $"(window.{_config.NameOfObjectToSaveProps} = window.{_config.NameOfObjectToSaveProps} || {{}})[\"{component.JsonContainerId}\"] = {_jsonService.Serialize(component.Props)};";
 
         return bootstrapScript + (_config.ReactVersion.Major < 18
-            ? $"ReactDOM.render({CreateElement(component)}, {GetElementById(component.ContainerId)});"
-            : $"ReactDOMClient.createRoot({GetElementById(component.ContainerId)}).render({CreateElement(component)});");
+            ? $"ReactDOM.render({CreateElement(component)}, {GetElementById(component.ContainerId)}, {{ identifierPrefix: '{component.ContainerId}' }});"
+            : $"ReactDOMClient.createRoot({GetElementById(component.ContainerId)}).render({CreateElement(component)}, {{ identifierPrefix: '{component.ContainerId}' }});");
     }
 
     private string Hydrate(Component component)
     {
         return _config.ReactVersion.Major < 18
-            ? $"ReactDOM.hydrate({CreateElement(component)}, {GetElementById(component.ContainerId)});"
-            : $"ReactDOMClient.hydrateRoot({GetElementById(component.ContainerId)}, {CreateElement(component)});";
+            ? $"ReactDOM.hydrate({CreateElement(component)}, {GetElementById(component.ContainerId)}, {{ identifierPrefix: '{component.ContainerId}' }});"
+            : $"ReactDOMClient.hydrateRoot({GetElementById(component.ContainerId)}, {CreateElement(component)}, {{ identifierPrefix: '{component.ContainerId}' }});";
     }
 }
 
-public record WriteOutputHtmlToOptions(bool ServerOnly = false, bool EnableStreaming = true);
+public class WriteOutputHtmlToOptions
+{
+    public WriteOutputHtmlToOptions(bool serverOnly = false, bool enableStreaming = true)
+    {
+        this.ServerOnly = serverOnly;
+        this.EnableStreaming = enableStreaming;
+    }
+
+    public bool ServerOnly { get; }
+    public bool EnableStreaming { get; }
+}

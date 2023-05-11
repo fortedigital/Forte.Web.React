@@ -2,19 +2,20 @@
 
 namespace Forte.React.AspNetCore.React;
 
-internal class Component
+internal class Component : IReactComponent
 {
-
-    public string Name { get; }
-    public object Props { get; }
+    public string Path { get; }
+    public object? Props { get; }
     public string ContainerId { get; }
     public string JsonContainerId { get; }
+    public bool ClientOnly { get; }
 
-    public Component(string name, object props)
+    public Component(string path, object? props = null, bool clientOnly = false)
     {
-        Name = name;
+        Path = path;
         Props = props;
-        ContainerId = Guid.NewGuid().ToString("n")[..8];
+        ClientOnly = clientOnly;
+        ContainerId = Guid.NewGuid().ToString("n").Substring(0, 8);
         JsonContainerId = ContainerId + "-json";
     }
 }
