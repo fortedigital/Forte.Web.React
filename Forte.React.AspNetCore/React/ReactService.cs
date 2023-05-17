@@ -12,7 +12,7 @@ namespace Forte.React.AspNetCore.React;
 
 public interface IReactService
 {
-    Task<string> RenderToStringAsync(string componentName, object? props = null, bool clientOnly = false);
+    Task<string> RenderToStringAsync(string componentName, object? props = null, RenderingMode renderingMode = RenderingMode.ClientAndServer);
 
     Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object? props = null,
         WriteOutputHtmlToOptions? writeOutputHtmlToOptions = null);
@@ -106,12 +106,12 @@ public class ReactService : IReactService
         return result!;
     }
 
-    public async Task<string> RenderToStringAsync(string componentName, object? props = null, bool clientOnly = false)
+    public async Task<string> RenderToStringAsync(string componentName, object? props = null, RenderingMode renderingMode = RenderingMode.ClientAndServer)
     {
-        var component = new Component(componentName, props, clientOnly);
+        var component = new Component(componentName, props, renderingMode);
         Components.Add(component);
 
-        if (_config.IsServerSideDisabled || clientOnly)
+        if (_config.IsServerSideDisabled || renderingMode == RenderingMode.Client)
         {
             return WrapRenderedStringComponent(string.Empty, component);
         }
@@ -162,19 +162,20 @@ public class ReactService : IReactService
 
     public string GetInitJavascript()
     {
-        string InitFunction(Component c)
-        {
-            var shouldHydrate = !_config.IsServerSideDisabled && !c.ClientOnly;
-            return shouldHydrate ? Hydrate(c) : Render(c);
-        }
-
-        var componentInitiation = Components.Select(InitFunction);
+        var componentInitiation = Components.Where(IsInitRequired).Select(GetInitJavascriptSource);
 
         return $"<script>{string.Join("", componentInitiation)}</script>";
     }
 
-    private static string GetElementById(string containerId)
-        => $"document.getElementById(\"{containerId}\")";
+    private string GetInitJavascriptSource(Component c)
+    {
+        var shouldHydrate = !_config.IsServerSideDisabled && c.RenderingMode.HasFlag(RenderingMode.Server);
+        return shouldHydrate ? Hydrate(c) : Render(c);
+    }
+
+    private static bool IsInitRequired(Component c) => c.RenderingMode.HasFlag(RenderingMode.Client);
+
+    private static string GetElementById(string containerId) => $"document.getElementById(\"{containerId}\")";
 
     private string CreateElement(Component component)
     {

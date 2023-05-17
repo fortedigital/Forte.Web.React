@@ -8,5 +8,5 @@ public interface IReactComponent<out TProps> : IReactComponent where TProps : IR
 public interface IReactComponent
 {
     string Path { get; }
-    bool ClientOnly { get; }
+    RenderingMode RenderingMode { get; }
 }
