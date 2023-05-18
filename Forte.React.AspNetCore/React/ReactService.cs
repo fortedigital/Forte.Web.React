@@ -12,12 +12,11 @@ namespace Forte.React.AspNetCore.React;
 
 public interface IReactService
 {
-    Task<string> RenderToStringAsync(string componentName, object? props = null, bool clientOnly = false);
-
-    Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object? props = null,
-        WriteOutputHtmlToOptions? writeOutputHtmlToOptions = null);
-
     string GetInitJavascript();
+    Task<IReadOnlyCollection<string>> GetAvailableComponentNames();
+
+    Task RenderAsync(TextWriter writer, string componentName, object? props = null, RenderOptions? options = null);
+    Task<string> RenderToStringAsync(string componentName, object? props = null, bool clientOnly = false);
 }
 
 public class ReactService : IReactService
@@ -49,7 +48,7 @@ public class ReactService : IReactService
         _jsonService = jsonService;
     }
 #endif
-    
+
 #if NET48
     public ReactService(INodeJSService nodeJsService, ReactConfiguration config)
     {
@@ -86,25 +85,16 @@ public class ReactService : IReactService
             }
         }
 
-        var currentAssembly = typeof(ReactService).Assembly;
-        var renderToStringScriptManifestName = currentAssembly.GetManifestResourceNames()
-            .Single(s => s == $"Forte.React.AspNetCore.{nodeJsScriptName}");
+        using var stream = GetStreamFromEmbeddedScript(nodeJsScriptName);
 
-        Stream ModuleFactory()
-        {
-            return currentAssembly.GetManifestResourceStream(renderToStringScriptManifestName) ??
-                   throw new InvalidOperationException(
-                       $"Can not get manifest resource stream with name - {renderToStringScriptManifestName}");
-        }
-
-        using var stream = ModuleFactory();
         var result = await _nodeJsService.InvokeFromStreamAsync<T>(stream,
-            nodeJsScriptName,
-            args: allArgs.ToArray())
+                nodeJsScriptName,
+                args: allArgs.ToArray())
             .ConfigureAwait(false);
 
         return result!;
     }
+
 
     public async Task<string> RenderToStringAsync(string componentName, object? props = null, bool clientOnly = false)
     {
@@ -121,8 +111,8 @@ public class ReactService : IReactService
         return WrapRenderedStringComponent(result, component);
     }
 
-    public async Task WriteOutputHtmlToAsync(TextWriter writer, string componentName, object? props = null,
-        WriteOutputHtmlToOptions? writeOutputHtmlToOptions = null)
+    public async Task RenderAsync(TextWriter writer, string componentName, object? props = null,
+        RenderOptions? options = null)
     {
         var component = new Component(componentName, props);
         Components.Add(component);
@@ -131,11 +121,12 @@ public class ReactService : IReactService
 
         if (_config.IsServerSideDisabled)
         {
+            await writer.WriteAsync("</div>").ConfigureAwait(false);
             return;
         }
 
         var result = await InvokeRenderTo<HttpResponseMessage>(component, props,
-            writeOutputHtmlToOptions ?? new WriteOutputHtmlToOptions()).ConfigureAwait(false);
+            options ?? new RenderOptions()).ConfigureAwait(false);
 
         using var reader = new StreamReader(await result.Content.ReadAsStreamAsync().ConfigureAwait(false));
 
@@ -148,6 +139,42 @@ public class ReactService : IReactService
         }
 
         await writer.WriteAsync("</div>").ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyCollection<string>> GetAvailableComponentNames()
+    {
+        const string getAvailableComponentNames = "getAvailableComponentNames.js";
+
+        if (_config.UseCache)
+        {
+            var (success, cachedResult) = await _nodeJsService
+                .TryInvokeFromCacheAsync<string[]>(getAvailableComponentNames, args: new [] { _config.ScriptUrls })
+                .ConfigureAwait(false);
+
+            if (success)
+            {
+                return cachedResult!;
+            }
+        }
+
+        using var stream = GetStreamFromEmbeddedScript(getAvailableComponentNames);
+
+        var result = await _nodeJsService.InvokeFromStreamAsync<string[]>(stream,
+                getAvailableComponentNames, args: new [] { _config.ScriptUrls })
+            .ConfigureAwait(false);
+
+        return result!;
+    }
+    
+    private static Stream GetStreamFromEmbeddedScript(string scriptName)
+    {
+        var currentAssembly = typeof(ReactService).Assembly;
+
+        var manifestResourceName = $"Forte.React.AspNetCore.Scripts.{scriptName}";
+        var stream = currentAssembly.GetManifestResourceStream(manifestResourceName) ??
+                     throw new InvalidOperationException($"Could not get manifest resource with name - {manifestResourceName}");
+
+        return stream;
     }
 
     private static string WrapRenderedStringComponent(string? renderedStringComponent, Component component)
@@ -178,7 +205,7 @@ public class ReactService : IReactService
 
     private string CreateElement(Component component)
     {
-        var element = $"React.createElement({component.Path}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
+        var element = $"React.createElement(window.__react.{component.Path}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
 
         return _config.StrictMode ? $"React.createElement(React.StrictMode, null, {element})" : element;
     }
@@ -200,9 +227,9 @@ public class ReactService : IReactService
     }
 }
 
-public class WriteOutputHtmlToOptions
+public class RenderOptions
 {
-    public WriteOutputHtmlToOptions(bool serverOnly = false, bool enableStreaming = true)
+    public RenderOptions(bool serverOnly = false, bool enableStreaming = true)
     {
         this.ServerOnly = serverOnly;
         this.EnableStreaming = enableStreaming;

@@ -21,10 +21,11 @@ module.exports = (
     });
 
     const ReactDOMServer = global["ReactDOMServer"];
-    const React = global["React"];
-
+    const React = global["React"];     
+    const componentRepository = global["__react"] || {};
+    
     const path = componentName.split(".");
-    let component = global[path[0]];
+    let component = componentRepository[path[0]];
     
     for (let segment = 1; segment < path.length; segment++) {
       component = component[path[segment]];
