@@ -28,7 +28,7 @@ public static class HtmlHelperExtensions
     public static IHtmlString React<TComponent>(this HtmlHelper _, TComponent component) where TComponent : IReactComponent
     {
         var reactService = DependencyResolver.Current.GetService<IReactService>();
-        var renderedComponent = reactService.RenderToStringAsync(component.Path, null, component.ClientOnly).GetAwaiter().GetResult();
+        var renderedComponent = reactService.RenderToStringAsync(component.Path, null, component.RenderingMode).GetAwaiter().GetResult();
 
         return new HtmlString(renderedComponent);
     }
@@ -36,7 +36,7 @@ public static class HtmlHelperExtensions
     public static IHtmlString React<TComponent, TProps>(this HtmlHelper _, TComponent component) where TComponent : IReactComponent<TProps> where TProps : IReactComponentProps
     {
         var reactService = DependencyResolver.Current.GetService<IReactService>();
-        var renderedComponent = reactService.RenderToStringAsync(component.Path, component.Props, component.ClientOnly).GetAwaiter().GetResult();
+        var renderedComponent = reactService.RenderToStringAsync(component.Path, component.Props, component.RenderingMode).GetAwaiter().GetResult();
 
         return new HtmlString(renderedComponent);
     }
@@ -61,14 +61,14 @@ public static class HtmlHelperExtensions
     {
         var reactService = htmlHelper.ViewContext.HttpContext.RequestServices.GetRequiredService<IReactService>();
 
-        return new HtmlString(await reactService.RenderToStringAsync(component.Path, null, component.ClientOnly));
+        return new HtmlString(await reactService.RenderToStringAsync(component.Path, null, component.RenderingMode));
     }
     
     public static async Task<IHtmlContent> ReactAsync<TComponent, TProps>(this IHtmlHelper htmlHelper, TComponent component) where TComponent : IReactComponent<TProps> where TProps : IReactComponentProps
     {
         var reactService = htmlHelper.ViewContext.HttpContext.RequestServices.GetRequiredService<IReactService>();
 
-        return new HtmlString(await reactService.RenderToStringAsync(component.Path, component.Props, component.ClientOnly));
+        return new HtmlString(await reactService.RenderToStringAsync(component.Path, component.Props, component.RenderingMode));
     }
 
     public static IHtmlContent InitJavascript(this IHtmlHelper htmlHelper)
