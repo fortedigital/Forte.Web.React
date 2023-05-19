@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <Packable>true</Packable>
-    <VersionPrefix>0.2.2.0</VersionPrefix>
+    <VersionPrefix>0.3.0.0</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -29,8 +29,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="renderToPipeableStream.js" />
-    <EmbeddedResource Include="renderToString.js" />
+    <EmbeddedResource Include="Scripts\getAvailableComponentNames.js" />
+    <EmbeddedResource Include="Scripts\renderToPipeableStream.js" />
+    <EmbeddedResource Include="Scripts\renderToString.js" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
