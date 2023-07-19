@@ -56,6 +56,13 @@ public class ReactService : IReactService
         _config = config;
         _jsonService = new JsonSerializationService(new ReactJsonSerializerOptions().Options);
     }
+    
+    public ReactService(INodeJSService nodeJsService, IJsonSerializationService jsonService, ReactConfiguration config)
+    {
+        _nodeJsService = nodeJsService;
+        _config = config;
+        _jsonService = jsonService;
+    }
 #endif
 
     private async Task<T> InvokeRenderTo<T>(Component component, object? props = null, params object[] args)

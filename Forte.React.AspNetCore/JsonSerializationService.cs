@@ -6,7 +6,7 @@ using Jering.Javascript.NodeJS;
 
 namespace Forte.React.AspNetCore;
 
-internal interface IJsonSerializationService : IJsonService
+public interface IJsonSerializationService : IJsonService
 {
     string Serialize<TValue>(TValue value);
 }
