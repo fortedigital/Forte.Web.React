@@ -15,32 +15,33 @@
     <Authors>Forte_ Digital</Authors>
     <PackageProjectUrl>https://github.com/fortedigital/Forte.React.AspNetCore</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseUrl>https://github.com/fortedigital/Forte.React.AspNetCore/blob/master/LICENSE</PackageLicenseUrl>
     <SignAssembly>false</SignAssembly>
     <RepositoryType>git</RepositoryType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jering.Javascript.NodeJS" Version="7.0.0-beta.4" />
+    <PackageReference Include="Jering.Javascript.NodeJS" Version="7.0.0-beta.4"/>
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../LICENSE" Pack="true" PackagePath="" />
+    <None Include="../LICENSE" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\getAvailableComponentNames.js" />
-    <EmbeddedResource Include="Scripts\renderToPipeableStream.js" />
-    <EmbeddedResource Include="Scripts\renderToString.js" />
+    <EmbeddedResource Include="Scripts\getAvailableComponentNames.js"/>
+    <EmbeddedResource Include="Scripts\renderToPipeableStream.js"/>
+    <EmbeddedResource Include="Scripts\renderToString.js"/>
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
-    <Reference Include="System.Web" />
-    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.9" />
+    <Reference Include="System.Web"/>
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.9"/>
   </ItemGroup>
 
 </Project>
