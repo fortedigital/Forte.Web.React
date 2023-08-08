@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Forte.React.AspNetCore.Configuration;
+namespace Forte.Web.React.Configuration;
 
 public class ReactConfiguration
 {

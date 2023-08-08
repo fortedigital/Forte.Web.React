@@ -3,14 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using Forte.React.AspNetCore.Configuration;
-using Forte.React.AspNetCore.React;
+using Forte.Web.React.Configuration;
+using Forte.Web.React.React;
 using Jering.Javascript.NodeJS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Forte.React.AspNetCore;
+namespace Forte.Web.React;
 
 public static class ReactForteExtensions
 {

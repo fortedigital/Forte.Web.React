@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Forte.React.AspNetCore.Configuration;
+using Forte.Web.React.Configuration;
 using Jering.Javascript.NodeJS;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Forte.React.AspNetCore.React;
+namespace Forte.Web.React.React;
 
 public interface IReactService
 {
@@ -177,7 +177,7 @@ public class ReactService : IReactService
     {
         var currentAssembly = typeof(ReactService).Assembly;
 
-        var manifestResourceName = $"Forte.React.AspNetCore.Scripts.{scriptName}";
+        var manifestResourceName = $"Forte.Web.React.Scripts.{scriptName}";
         var stream = currentAssembly.GetManifestResourceStream(manifestResourceName) ??
                      throw new InvalidOperationException($"Could not get manifest resource with name - {manifestResourceName}");
 

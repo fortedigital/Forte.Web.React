@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Forte.React.AspNetCore.React;
+namespace Forte.Web.React.React;
 
 internal class Component : IReactComponent
 {

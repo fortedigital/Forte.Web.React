@@ -1,4 +1,4 @@
-﻿using Forte.React.AspNetCore.React;
+﻿using Forte.Web.React.React;
 using Microsoft.Extensions.DependencyInjection;
 
 #if NET48
@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 #endif
 
-namespace Forte.React.AspNetCore;
+namespace Forte.Web.React;
 
 public static class HtmlHelperExtensions
 {
