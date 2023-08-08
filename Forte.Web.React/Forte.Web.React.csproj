@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <Packable>true</Packable>
-    <VersionPrefix>1.0.0.0</VersionPrefix>
+    <VersionPrefix>1.0.1.0</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -15,7 +15,6 @@
     <Authors>Forte_ Digital</Authors>
     <PackageProjectUrl>https://github.com/fortedigital/Forte.Web.React</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageLicenseUrl>https://github.com/fortedigital/Forte.Web.React/blob/master/LICENSE</PackageLicenseUrl>
     <SignAssembly>false</SignAssembly>
     <RepositoryType>git</RepositoryType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
