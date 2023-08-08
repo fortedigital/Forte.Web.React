@@ -14,11 +14,11 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
     - name: Build
-      working-directory: ./Forte.React.AspNetCore
+      working-directory: ./Forte.Web.React
       run: dotnet build -c Release
     - name: Pack nugets
-      working-directory: ./Forte.React.AspNetCore
+      working-directory: ./Forte.Web.React
       run: dotnet pack -c Release --no-build --output . 
     - name: Push to NuGet
-      working-directory: ./Forte.React.AspNetCore
+      working-directory: ./Forte.Web.React
       run: dotnet nuget push "*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json

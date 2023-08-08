@@ -1,4 +1,4 @@
-# ForteReact
+# Forte.Web.React
 
 Library to render React library components on the server-side with C# as well as on the client.
 Library is a wrapper for [Javascript.NodeJS](https://github.com/JeringTech/Javascript.NodeJS)
