@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Jering.Javascript.NodeJS;
 
-namespace Forte.React.AspNetCore.React;
+namespace Forte.Web.React.React;
 
 public sealed class StaticNodeJsServiceProxy : INodeJSService
 {

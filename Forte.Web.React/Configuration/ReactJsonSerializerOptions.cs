@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Forte.React.AspNetCore.Configuration;
+namespace Forte.Web.React.Configuration;
 
 public class ReactJsonSerializerOptions
 {

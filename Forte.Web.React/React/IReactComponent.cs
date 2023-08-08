@@ -1,4 +1,4 @@
-namespace Forte.React.AspNetCore.React;
+namespace Forte.Web.React.React;
 
 public interface IReactComponent<out TProps> : IReactComponent where TProps : IReactComponentProps
 {

@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Jering.Javascript.NodeJS;
 
-namespace Forte.React.AspNetCore;
+namespace Forte.Web.React;
 
 public interface IJsonSerializationService : IJsonService
 {
