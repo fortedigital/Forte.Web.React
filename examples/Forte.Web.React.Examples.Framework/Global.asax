@@ -1,0 +1,1 @@
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="Forte.Web.React.Examples.Framework.MvcApplication" Language="C#" %>

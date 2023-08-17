@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Forte Examples</title>
+    
+    @* Include bundle with React component styles *@
+    @Styles.Render("~/Content/React")
+    
+    @RenderSection("styles", required: false)
+    
+    <style>
+        :root {
+          font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+          line-height: 1.5;
+          font-weight: 400;
+        
+          color-scheme: light dark;
+          color: rgba(255, 255, 255, 0.87);
+          background-color: #464646;
+        
+          font-synthesis: none;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          -webkit-text-size-adjust: 100%;
+          
+          max-width: 1200px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        
+        @@media (prefers-color-scheme: light) {
+          :root {
+            color: #213547;
+            background-color: #ffffff;
+          }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            margin-top: 30px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        hr {
+            margin-top: 4rem;
+            margin-bottom: 4rem;
+        }
+        .example--container {
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .flex {
+            display: flex;
+            flex-direction: row;
+            gap: 64px;
+        }
+        
+        .flex > * {
+            flex:  1;
+        }
+
+    </style>
+</head>
+<body>
+<div>
+    @RenderBody()
+</div>
+
+@* Include bundle with React component scripts *@
+@Scripts.Render("~/bundles/React")
+
+@RenderSection("scripts", required: false)
+</body>
+</html>
