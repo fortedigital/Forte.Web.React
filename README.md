@@ -12,24 +12,6 @@ This library uses an out-of-process Node Service using [Javascript.NodeJS](https
 ## Usage (.Net Core)
 For .Net Framework usage, check the example mentioned above.
 
-### 1. Add WebpackOptions to `appsettings`
-
-#### For Development 
-```
-  "Webpack": {
-    "OutputPath": "http://localhost:8080"
-  }
-```
-
-#### For Production
-```
-  "Webpack": {
-    "OutputPath": "./path/to/output"
-  }
-```
-
-### 2. Modify Startup.cs
-
 ```
   services.AddReact(nodeJsProcessOptions => {...}, configureOutOfProcessNodeJS => {...})
 ```
