@@ -1,9 +1,16 @@
 # Forte.Web.React
 
-Library to render React library components on the server-side with C# as well as on the client.
-Library is a wrapper for [Javascript.NodeJS](https://github.com/JeringTech/Javascript.NodeJS)
+Unlock the power of Server Side rendered React components within your ASP.NET Core MVC or ASP.NET MVC applicaiton.
+**Forte.Web.React** can render components on server only, client only, on both - using hydration.
+This library uses an out-of-process Node Service using [Javascript.NodeJS](https://github.com/JeringTech/Javascript.NodeJS) as a C# proxy.
 
-## Usage
+## Examples
+
+- [ASP.NET Core Example](examples/Forte.Web.React.Examples.Core)
+- [ASP.NET (Framework) Example](examples/Forte.Web.React.Examples.Framework)
+
+## Usage (.Net Core)
+For .Net Framework usage, check the example mentioned above.
 
 ### 1. Add WebpackOptions to `appsettings`
 
