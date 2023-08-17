@@ -1,4 +1,8 @@
+![ForteDigital](https://avatars.githubusercontent.com/u/31007705?s=200&v=4)
 # Forte.Web.React
+![Nuget](https://img.shields.io/nuget/dt/Forte.Web.React?label=nuget&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FForte.Web.React)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/fortedigital/Forte.Web.React/build.yml)
+
 
 Unlock the power of Server Side rendered React components within your ASP.NET Core MVC or ASP.NET MVC applicaiton.
 **Forte.Web.React** can render components on server only, client only, on both - using hydration.
