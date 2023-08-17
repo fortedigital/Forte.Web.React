@@ -101,5 +101,5 @@ Establish your React components and their associated props. The subsequent examp
 ## Rendering Components in Views
 To render your React component in a Razor view, make use of a helper method like this:
 ```csharp
-@Html.React(new ExampleComponent { Props = Model, RenderingMode = RenderingMode.ClientAndServer })
+@(Html.React<ExampleComponent, ExampleComponentProps>(new ExampleComponent { Props = Model, RenderingMode = RenderingMode.ClientAndServer }))
 ```
