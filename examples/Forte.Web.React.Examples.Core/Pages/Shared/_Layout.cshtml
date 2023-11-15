@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Forte Examples</title>
+
+    @* Include bundle with React component styles *@
+    <link rel="stylesheet" asp-href-include="/Client/dist/assets/index-*.css"/>
+    <link rel="stylesheet" href="~/Forte.Web.React.Examples.Core.styles.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/main.css" asp-append-version="true"/>
+
+    @await RenderSectionAsync("styles", required: false)
+</head>
+<body>
+<div>
+    @RenderBody()
+</div>
+
+@* Include bundle with React component scripts *@
+<script type="text/javascript" asp-src-include="/Client/dist/assets/index-*.js"></script>
+
+@await RenderSectionAsync("scripts", required: false)
+</body>
+</html>

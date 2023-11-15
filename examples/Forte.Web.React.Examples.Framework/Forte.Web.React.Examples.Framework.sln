@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forte.Web.React.Examples.Framework", "Forte.Web.React.Examples.Framework.csproj", "{FDB370BF-1352-493F-B030-E48F1F31BE4F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FDB370BF-1352-493F-B030-E48F1F31BE4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDB370BF-1352-493F-B030-E48F1F31BE4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDB370BF-1352-493F-B030-E48F1F31BE4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDB370BF-1352-493F-B030-E48F1F31BE4F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

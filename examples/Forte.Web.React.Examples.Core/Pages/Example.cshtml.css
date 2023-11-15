@@ -1,0 +1,33 @@
+.flex {
+    display: flex;
+    flex-direction: row;
+    gap: 64px;
+}
+
+@media (max-width: 800px) {
+    .flex {
+        flex-direction: column;
+    }
+}
+
+.flex > * {
+    flex: 1;
+}
+
+h2 {
+    margin-top: 30px;
+}
+
+p {
+    margin-bottom: 20px;
+}
+
+hr {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+
+.example--container {
+    border-radius: 4px;
+    overflow: hidden;
+}

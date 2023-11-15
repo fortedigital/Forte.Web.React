@@ -1,0 +1,50 @@
+﻿@page "/"
+@using Forte.Web.React.Examples.Core.React
+@using Forte.Web.React.React
+@model ExampleModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<h1>Forte.Web.React - ASP.NET Core Example</h1>
+
+<hr/>
+
+<div class="flex">
+    <div>
+        <h2>Client Side Rendering (CSR)</h2>
+        <p>In Client Side Rendering, the rendering process is deferred until the page is loaded in the browser. This means that the initial HTML page is lightweight and doesn't contain the component's content. Instead, the component is initialized and rendered using JavaScript on the client side. This allows for dynamic updates and interactions.</p>
+    </div>
+    <div class="example--container">
+        @await Html.ReactAsync(new ExampleComponent { Props = Model.Props, RenderingMode = RenderingMode.Client })
+    </div>
+</div>
+
+<hr/>
+
+<div class="flex">
+    <div>
+        <h2>Server Side Rendering (SSR)</h2>
+        <p>In Server Side Rendering, the component is initially rendered on the server as static markup. This pre-rendered content is sent to the browser, providing faster initial page loads and improved SEO. However, there is no client-side hydration, meaning the component remains static without interactive features.</p>
+    </div>
+    <div class="example--container">
+        @await Html.ReactAsync(new ExampleComponent { Props = Model.Props, RenderingMode = RenderingMode.Server })
+    </div>
+</div>
+
+<hr/>
+
+<div class="flex">
+    <div>
+        <h2>Server Side Rendering with Client Hydration</h2>
+        <p>In this approach, the component is first rendered as static markup on the server, similar to SSR. However, additional client-side JavaScript is used to "hydrate" the static markup, enabling interactivity and dynamic behavior. This combines the benefits of both SSR and CSR.</p>
+    </div>
+    <div class="example--container">
+        @await Html.ReactAsync(new ExampleComponent { Props = Model.Props, RenderingMode = RenderingMode.ClientAndServer })
+    </div>
+</div>
+
+@section scripts
+{
+    @Html.InitJavascript()
+}
