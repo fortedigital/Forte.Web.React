@@ -1,6 +1,10 @@
 ![ForteDigital](https://avatars.githubusercontent.com/u/31007705?s=200&v=4)
 # Forte.Web.React
-![Nuget](https://img.shields.io/nuget/dt/Forte.Web.React?label=nuget&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FForte.Web.React)
+[![Nuget](https://img.shields.io/nuget/vpre/Forte.Web.React?label=nuget)](https://www.nuget.org/packages/Forte.Web.React)
+[![Downloads](https://img.shields.io/nuget/dt/Forte.Web.React?label=downloads)](https://www.nuget.org/packages/Forte.Web.React)
+![target core](https://img.shields.io/badge/target-.Net%20Core%206.0-%23512bd4)
+![target framework](https://img.shields.io/badge/target-.Net%204.8-%23512bd4)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/fortedigital/Forte.Web.React/blob/master/LICENSE)
 ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/fortedigital/Forte.Web.React/build.yml)
 
 
