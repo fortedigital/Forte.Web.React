@@ -71,7 +71,8 @@ module.exports = (
         onError(err) {
           error = err;
           console.error(err);
-        },
+        }, 
+        identifierPrefix: options.identifierPrefix,  
       }
 
     );
