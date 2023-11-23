@@ -137,7 +137,7 @@ public class ReactService : IReactService
         {
             options.EnableStreaming,
             options.ServerOnly,
-            IdentifierPrefix = component.ContainerId,
+            IdentifierPrefix = _config.UseIdentifierPrefix ? component.ContainerId : null,
         };
 
         var result = await InvokeRenderTo<HttpResponseMessage>(component, props, streamingOptions).ConfigureAwait(false);
