@@ -121,7 +121,8 @@ public class ReactService : IReactService
     public async Task RenderAsync(TextWriter writer, string componentName, object? props = null,
         RenderOptions? options = null)
     {
-        var component = new Component(componentName, props);
+        options ??= new RenderOptions();
+        var component = new Component(componentName, props, options.ServerOnly ? RenderingMode.Server : RenderingMode.ClientAndServer);
         Components.Add(component);
 
         await writer.WriteAsync($"<div id=\"{component.ContainerId}\">").ConfigureAwait(false);
@@ -132,7 +133,6 @@ public class ReactService : IReactService
             return;
         }
 
-        options ??= new RenderOptions();
         var streamingOptions = new
         {
             options.EnableStreaming,
@@ -210,7 +210,7 @@ public class ReactService : IReactService
 
     private string GetInitJavascriptSource(Component c)
     {
-        var shouldHydrate = !_config.IsServerSideDisabled && c.RenderingMode.HasFlag(RenderingMode.Server);
+        var shouldHydrate = !_config.IsServerSideDisabled && c.RenderingMode == RenderingMode.ClientAndServer;
         return shouldHydrate ? Hydrate(c) : Render(c);
     }
 
