@@ -12,7 +12,7 @@ public class ExampleModel : PageModel
         Props = new ExampleComponentProps
         {
             InitCount = initCount,
-            Text = text ?? "Use query parameters 'initCount' and 'text' to change values in the React component",
+            Text = string.IsNullOrEmpty(text) ? "Use query parameters 'initCount' and 'text' to change values in the React component" : text,
         };
     }
 }

@@ -32,6 +32,6 @@ app.MapRazorPages();
 
 var dir = app.Environment.WebRootPath;
 var js = Directory.GetFiles(Path.Combine(dir, "Client/dist/assets")).First(f => f.EndsWith(".js"));
-app.UseReact(new[] { js }, new Version(18, 2, 0), strictMode: true);
+app.UseReact(new[] { js }, new Version(18, 2, 0), strictMode: true, useCache: app.Environment.IsDevelopment());
 
 app.Run();

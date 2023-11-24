@@ -56,7 +56,7 @@ public class ReactService : IReactService
         _config = config;
         _jsonService = new JsonSerializationService(new ReactJsonSerializerOptions().Options);
     }
-    
+
     public ReactService(INodeJSService nodeJsService, IJsonSerializationService jsonService, ReactConfiguration config)
     {
         _nodeJsService = nodeJsService;
@@ -121,7 +121,8 @@ public class ReactService : IReactService
     public async Task RenderAsync(TextWriter writer, string componentName, object? props = null,
         RenderOptions? options = null)
     {
-        var component = new Component(componentName, props);
+        options ??= new RenderOptions();
+        var component = new Component(componentName, props, options.ServerOnly ? RenderingMode.Server : RenderingMode.ClientAndServer);
         Components.Add(component);
 
         await writer.WriteAsync($"<div id=\"{component.ContainerId}\">").ConfigureAwait(false);
@@ -132,8 +133,14 @@ public class ReactService : IReactService
             return;
         }
 
-        var result = await InvokeRenderTo<HttpResponseMessage>(component, props,
-            options ?? new RenderOptions()).ConfigureAwait(false);
+        var streamingOptions = new
+        {
+            options.EnableStreaming,
+            options.ServerOnly,
+            IdentifierPrefix = _config.UseIdentifierPrefix ? component.ContainerId : null,
+        };
+
+        var result = await InvokeRenderTo<HttpResponseMessage>(component, props, streamingOptions).ConfigureAwait(false);
 
         using var reader = new StreamReader(await result.Content.ReadAsStreamAsync().ConfigureAwait(false));
 
@@ -172,7 +179,7 @@ public class ReactService : IReactService
 
         return result!;
     }
-    
+
     private static Stream GetStreamFromEmbeddedScript(string scriptName)
     {
         var currentAssembly = typeof(ReactService).Assembly;
@@ -203,7 +210,7 @@ public class ReactService : IReactService
 
     private string GetInitJavascriptSource(Component c)
     {
-        var shouldHydrate = !_config.IsServerSideDisabled && c.RenderingMode.HasFlag(RenderingMode.Server);
+        var shouldHydrate = !_config.IsServerSideDisabled && c.RenderingMode == RenderingMode.ClientAndServer;
         return shouldHydrate ? Hydrate(c) : Render(c);
     }
 
@@ -220,27 +227,40 @@ public class ReactService : IReactService
 
     private string Render(Component component)
     {
-        var bootstrapScript = $"(window.{_config.NameOfObjectToSaveProps} = window.{_config.NameOfObjectToSaveProps} || {{}})[\"{component.JsonContainerId}\"] = {_jsonService.Serialize(component.Props)};";
+        var bootstrapScript =
+            $"(window.{_config.NameOfObjectToSaveProps} = window.{_config.NameOfObjectToSaveProps} || {{}})[\"{component.JsonContainerId}\"] = {_jsonService.Serialize(component.Props)};";
+
+        var elementById = GetElementById(component.ContainerId);
+        var element = CreateElement(component);
+        var options = GetIdentifierPrefix(component);
 
         return bootstrapScript + (_config.ReactVersion.Major < 18
-            ? $"ReactDOM.render({CreateElement(component)}, {GetElementById(component.ContainerId)}, {{ identifierPrefix: '{component.ContainerId}' }});"
-            : $"ReactDOMClient.createRoot({GetElementById(component.ContainerId)}).render({CreateElement(component)}, {{ identifierPrefix: '{component.ContainerId}' }});");
+            ? $"ReactDOM.render({element}, {elementById});"
+            : $"ReactDOMClient.createRoot({elementById}{options}).render({element});");
     }
 
     private string Hydrate(Component component)
     {
+        var elementById = GetElementById(component.ContainerId);
+        var element = CreateElement(component);
+        var options = GetIdentifierPrefix(component);
+
         return _config.ReactVersion.Major < 18
-            ? $"ReactDOM.hydrate({CreateElement(component)}, {GetElementById(component.ContainerId)}, {{ identifierPrefix: '{component.ContainerId}' }});"
-            : $"ReactDOMClient.hydrateRoot({GetElementById(component.ContainerId)}, {CreateElement(component)}, {{ identifierPrefix: '{component.ContainerId}' }});";
+            ? $"ReactDOM.hydrate({element}, {elementById});"
+            : $"ReactDOMClient.hydrateRoot({elementById}, {element}{options});";
     }
+
+    private string GetIdentifierPrefix(Component component) => _config.UseIdentifierPrefix
+        ? $", {{ identifierPrefix: '{component.ContainerId}' }}"
+        : string.Empty;
 }
 
 public class RenderOptions
 {
     public RenderOptions(bool serverOnly = false, bool enableStreaming = true)
     {
-        this.ServerOnly = serverOnly;
-        this.EnableStreaming = enableStreaming;
+        ServerOnly = serverOnly;
+        EnableStreaming = enableStreaming;
     }
 
     public bool ServerOnly { get; }
