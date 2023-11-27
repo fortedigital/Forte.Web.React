@@ -118,16 +118,15 @@ public class ReactService : IReactService
         return WrapRenderedStringComponent(result, component);
     }
 
-    public async Task RenderAsync(TextWriter writer, string componentName, object? props = null,
-        RenderOptions? options = null)
+    public async Task RenderAsync(TextWriter writer, string componentName, object? props = null, RenderOptions? options = null)
     {
         options ??= new RenderOptions();
-        var component = new Component(componentName, props, options.ServerOnly ? RenderingMode.Server : RenderingMode.ClientAndServer);
+        var component = new Component(componentName, props, options.RenderingMode);
         Components.Add(component);
 
         await writer.WriteAsync($"<div id=\"{component.ContainerId}\">").ConfigureAwait(false);
 
-        if (_config.IsServerSideDisabled)
+        if (_config.IsServerSideDisabled || component.RenderingMode == RenderingMode.Client)
         {
             await writer.WriteAsync("</div>").ConfigureAwait(false);
             return;
@@ -136,7 +135,7 @@ public class ReactService : IReactService
         var streamingOptions = new
         {
             options.EnableStreaming,
-            options.ServerOnly,
+            ServerOnly = component.RenderingMode == RenderingMode.Server,
             IdentifierPrefix = _config.UseIdentifierPrefix ? component.ContainerId : null,
         };
 
@@ -257,12 +256,20 @@ public class ReactService : IReactService
 
 public class RenderOptions
 {
-    public RenderOptions(bool serverOnly = false, bool enableStreaming = true)
+    public RenderOptions() : this(RenderingMode.ClientAndServer, true)
     {
-        ServerOnly = serverOnly;
+    }
+    
+    public RenderOptions(bool serverOnly, bool enableStreaming = true) : this(serverOnly ? RenderingMode.Server : RenderingMode.ClientAndServer, enableStreaming)
+    {
+    }
+    
+    public RenderOptions(RenderingMode renderingMode, bool enableStreaming = true)
+    {
+        RenderingMode = renderingMode;
         EnableStreaming = enableStreaming;
     }
 
-    public bool ServerOnly { get; }
+    public RenderingMode RenderingMode { get; }
     public bool EnableStreaming { get; }
 }
