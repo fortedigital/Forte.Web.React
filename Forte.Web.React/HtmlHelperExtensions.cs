@@ -17,26 +17,34 @@ namespace Forte.Web.React;
 public static class HtmlHelperExtensions
 {
 #if NET48
-    public static IHtmlString React<T>(this HtmlHelper _, string componentName, T props)
+    public static IHtmlString React<T>(this HtmlHelper _, string componentName, T props, object? globalContext = null)
     {
         var reactService = DependencyResolver.Current.GetService<IReactService>();
-        var renderedComponent = reactService.RenderToStringAsync(componentName, props).GetAwaiter().GetResult();
+        var renderedComponent = reactService.RenderToStringAsync(componentName, props, globalContext: globalContext)
+            .GetAwaiter().GetResult();
 
         return new HtmlString(renderedComponent);
     }
-    
-    public static IHtmlString React<TComponent>(this HtmlHelper _, TComponent component) where TComponent : IReactComponent
+
+    public static IHtmlString React<TComponent>(this HtmlHelper _, TComponent component, object? globalContext = null)
+        where TComponent : IReactComponent
     {
         var reactService = DependencyResolver.Current.GetService<IReactService>();
-        var renderedComponent = reactService.RenderToStringAsync(component.Path, null, component.RenderingMode).GetAwaiter().GetResult();
+        var renderedComponent = reactService
+            .RenderToStringAsync(component.Path, null, component.RenderingMode, globalContext)
+            .GetAwaiter().GetResult();
 
         return new HtmlString(renderedComponent);
     }
-    
-    public static IHtmlString React<TComponent, TProps>(this HtmlHelper _, TComponent component) where TComponent : IReactComponent<TProps> where TProps : IReactComponentProps
+
+    public static IHtmlString React<TComponent, TProps>(this HtmlHelper _, TComponent component,
+        object? globalContext = null)
+        where TComponent : IReactComponent<TProps> where TProps : IReactComponentProps
     {
         var reactService = DependencyResolver.Current.GetService<IReactService>();
-        var renderedComponent = reactService.RenderToStringAsync(component.Path, component.Props, component.RenderingMode).GetAwaiter().GetResult();
+        var renderedComponent = reactService
+            .RenderToStringAsync(component.Path, component.Props, component.RenderingMode, globalContext).GetAwaiter()
+            .GetResult();
 
         return new HtmlString(renderedComponent);
     }
@@ -47,28 +55,38 @@ public static class HtmlHelperExtensions
 
         return new HtmlString(reactService.GetInitJavascript());
     }
+}
 #endif
 
 #if NET6_0_OR_GREATER
-    public static async Task<IHtmlContent> ReactAsync<T>(this IHtmlHelper htmlHelper, string componentName, T props)
+    public static async Task<IHtmlContent> ReactAsync<T>(this IHtmlHelper htmlHelper, string componentName, T props,
+        object? globalContext = null)
     {
         var reactService = htmlHelper.ViewContext.HttpContext.RequestServices.GetRequiredService<IReactService>();
 
-        return new HtmlString(await reactService.RenderToStringAsync(componentName, props));
+        return new HtmlString(
+            await reactService.RenderToStringAsync(componentName, props, globalContext: globalContext));
     }
-    
-    public static async Task<IHtmlContent> ReactAsync<TComponent>(this IHtmlHelper htmlHelper, TComponent component) where TComponent : IReactComponent
+
+    public static async Task<IHtmlContent> ReactAsync<TComponent>(this IHtmlHelper htmlHelper, TComponent component,
+        object? globalContext = null)
+        where TComponent : IReactComponent
     {
         var reactService = htmlHelper.ViewContext.HttpContext.RequestServices.GetRequiredService<IReactService>();
 
-        return new HtmlString(await reactService.RenderToStringAsync(component.Path, null, component.RenderingMode));
+        return new HtmlString(
+            await reactService.RenderToStringAsync(component.Path, null, component.RenderingMode, globalContext));
     }
-    
-    public static async Task<IHtmlContent> ReactAsync<TComponent, TProps>(this IHtmlHelper htmlHelper, TComponent component) where TComponent : IReactComponent<TProps> where TProps : IReactComponentProps
+
+    public static async Task<IHtmlContent> ReactAsync<TComponent, TProps>(this IHtmlHelper htmlHelper,
+        TComponent component, object? globalContext =
+            null) where TComponent : IReactComponent<TProps> where TProps : IReactComponentProps
     {
         var reactService = htmlHelper.ViewContext.HttpContext.RequestServices.GetRequiredService<IReactService>();
 
-        return new HtmlString(await reactService.RenderToStringAsync(component.Path, component.Props, component.RenderingMode));
+        return new HtmlString(
+            await reactService.RenderToStringAsync(component.Path, component.Props, component.RenderingMode,
+                globalContext));
     }
 
     public static IHtmlContent InitJavascript(this IHtmlHelper htmlHelper)
@@ -77,5 +95,5 @@ public static class HtmlHelperExtensions
 
         return new HtmlString(reactService.GetInitJavascript());
     }
-#endif
 }
+#endif
