@@ -4,7 +4,9 @@
     jsonContainerId,
     props = {},
     scriptFiles,
-    nameOfObjectToSaveProps
+    nameOfObjectToSaveProps,
+    nameOfGlobalDataToSave,
+    globalData = {}
 ) => {
     scriptFiles.forEach((scriptFile) => {
         require(scriptFile);
@@ -13,6 +15,7 @@
     const ReactDOMServer = global["ReactDOMServer"];
     const React = global["React"];
     const componentRepository = global["__react"] || {};
+    global[nameOfGlobalDataToSave] = globalData;
 
     const path = componentName.split(".");
     let component = componentRepository[path[0]];

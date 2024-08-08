@@ -16,7 +16,9 @@ public interface IReactService
     Task<IReadOnlyCollection<string>> GetAvailableComponentNames();
 
     Task RenderAsync(TextWriter writer, string componentName, object? props = null, RenderOptions? options = null);
-    Task<string> RenderToStringAsync(string componentName, object? props = null, RenderingMode renderingMode = RenderingMode.ClientAndServer);
+
+    Task<string> RenderToStringAsync(string componentName, object? props = null,
+        RenderingMode renderingMode = RenderingMode.ClientAndServer, object? globalData = null);
 }
 
 public class ReactService : IReactService
@@ -65,7 +67,7 @@ public class ReactService : IReactService
     }
 #endif
 
-    private async Task<T> InvokeRenderTo<T>(Component component, object? props = null, params object[] args)
+    private async Task<T> InvokeRenderTo<T>(Component component, object? props = null, object? globalData = null, params object[] args)
     {
         var allArgs = new List<object>()
         {
@@ -74,6 +76,8 @@ public class ReactService : IReactService
             props,
             _config.ScriptUrls,
             _config.NameOfObjectToSaveProps,
+            _config.NameOfGlobalDataToSave,
+            globalData
         };
         allArgs.AddRange(args);
 
@@ -103,7 +107,8 @@ public class ReactService : IReactService
     }
 
 
-    public async Task<string> RenderToStringAsync(string componentName, object? props = null, RenderingMode renderingMode = RenderingMode.ClientAndServer)
+    public async Task<string> RenderToStringAsync(string componentName, object? props = null,
+        RenderingMode renderingMode = RenderingMode.ClientAndServer, object? globalData = null)
     {
         var component = new Component(componentName, props, renderingMode);
         Components.Add(component);
@@ -113,12 +118,13 @@ public class ReactService : IReactService
             return WrapRenderedStringComponent(string.Empty, component);
         }
 
-        var result = await InvokeRenderTo<string>(component, props).ConfigureAwait(false);
+        var result = await InvokeRenderTo<string>(component, props, globalData).ConfigureAwait(false);
 
         return WrapRenderedStringComponent(result, component);
     }
 
-    public async Task RenderAsync(TextWriter writer, string componentName, object? props = null, RenderOptions? options = null)
+    public async Task RenderAsync(TextWriter writer, string componentName, object? props = null,
+        RenderOptions? options = null)
     {
         options ??= new RenderOptions();
         var component = new Component(componentName, props, options.RenderingMode);
@@ -139,7 +145,8 @@ public class ReactService : IReactService
             IdentifierPrefix = _config.UseIdentifierPrefix ? component.ContainerId : null,
         };
 
-        var result = await InvokeRenderTo<HttpResponseMessage>(component, props, streamingOptions).ConfigureAwait(false);
+        var result = await InvokeRenderTo<HttpResponseMessage>(component, props, streamingOptions)
+            .ConfigureAwait(false);
 
         using var reader = new StreamReader(await result.Content.ReadAsStreamAsync().ConfigureAwait(false));
 
@@ -161,7 +168,7 @@ public class ReactService : IReactService
         if (_config.UseCache)
         {
             var (success, cachedResult) = await _nodeJsService
-                .TryInvokeFromCacheAsync<string[]>(getAvailableComponentNames, args: new [] { _config.ScriptUrls })
+                .TryInvokeFromCacheAsync<string[]>(getAvailableComponentNames, args: new[] { _config.ScriptUrls })
                 .ConfigureAwait(false);
 
             if (success)
@@ -173,7 +180,7 @@ public class ReactService : IReactService
         using var stream = GetStreamFromEmbeddedScript(getAvailableComponentNames);
 
         var result = await _nodeJsService.InvokeFromStreamAsync<string[]>(stream,
-                getAvailableComponentNames, args: new [] { _config.ScriptUrls })
+                getAvailableComponentNames, args: new[] { _config.ScriptUrls })
             .ConfigureAwait(false);
 
         return result!;
@@ -185,7 +192,8 @@ public class ReactService : IReactService
 
         var manifestResourceName = $"Forte.Web.React.Scripts.{scriptName}";
         var stream = currentAssembly.GetManifestResourceStream(manifestResourceName) ??
-                     throw new InvalidOperationException($"Could not get manifest resource with name - {manifestResourceName}");
+                     throw new InvalidOperationException(
+                         $"Could not get manifest resource with name - {manifestResourceName}");
 
         return stream;
     }
@@ -219,7 +227,8 @@ public class ReactService : IReactService
 
     private string CreateElement(Component component)
     {
-        var element = $"React.createElement(window.__react.{component.Path}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
+        var element =
+            $"React.createElement(window.__react.{component.Path}, window.{_config.NameOfObjectToSaveProps}[\"{component.JsonContainerId}\"])";
 
         return _config.StrictMode ? $"React.createElement(React.StrictMode, null, {element})" : element;
     }
@@ -259,11 +268,12 @@ public class RenderOptions
     public RenderOptions() : this(RenderingMode.ClientAndServer, true)
     {
     }
-    
-    public RenderOptions(bool serverOnly, bool enableStreaming = true) : this(serverOnly ? RenderingMode.Server : RenderingMode.ClientAndServer, enableStreaming)
+
+    public RenderOptions(bool serverOnly, bool enableStreaming = true) : this(
+        serverOnly ? RenderingMode.Server : RenderingMode.ClientAndServer, enableStreaming)
     {
     }
-    
+
     public RenderOptions(RenderingMode renderingMode, bool enableStreaming = true)
     {
         RenderingMode = renderingMode;
