@@ -27,10 +27,10 @@ public class ReactConfiguration
     public string NameOfObjectToSaveProps { get; set; } = "__reactProps";
 
     /// <summary>
-    /// Name of the object used to save global context. Default value is "__globalContext".
-    /// <remarks>NameOfGlobalContextToSave is supported by <see cref="IReactService.RenderToStringAsync"/> method.</remarks>
+    /// Name of the object used to save global data object. Default value is "__globalData".
+    /// <remarks>NameOfGlobalDataToSave is supported by <see cref="IReactService.RenderToStringAsync"/> method.</remarks>
     /// </summary>
-    public string NameOfGlobalContextToSave { get; set; } = "__globalContext";
+    public string NameOfGlobalDataToSave { get; set; } = "__globalData";
 
     /// <summary>
     /// Indicates whether caching is used. Default value is "true".

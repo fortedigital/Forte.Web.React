@@ -18,7 +18,7 @@ public interface IReactService
     Task RenderAsync(TextWriter writer, string componentName, object? props = null, RenderOptions? options = null);
 
     Task<string> RenderToStringAsync(string componentName, object? props = null,
-        RenderingMode renderingMode = RenderingMode.ClientAndServer, object? globalContext = null);
+        RenderingMode renderingMode = RenderingMode.ClientAndServer, object? globalData = null);
 }
 
 public class ReactService : IReactService
@@ -67,7 +67,7 @@ public class ReactService : IReactService
     }
 #endif
 
-    private async Task<T> InvokeRenderTo<T>(Component component, object? props = null, object? globalContext = null, params object[] args)
+    private async Task<T> InvokeRenderTo<T>(Component component, object? props = null, object? globalData = null, params object[] args)
     {
         var allArgs = new List<object>()
         {
@@ -76,8 +76,8 @@ public class ReactService : IReactService
             props,
             _config.ScriptUrls,
             _config.NameOfObjectToSaveProps,
-            _config.NameOfGlobalContextToSave,
-            globalContext
+            _config.NameOfGlobalDataToSave,
+            globalData
         };
         allArgs.AddRange(args);
 
@@ -108,7 +108,7 @@ public class ReactService : IReactService
 
 
     public async Task<string> RenderToStringAsync(string componentName, object? props = null,
-        RenderingMode renderingMode = RenderingMode.ClientAndServer, object? globalContext = null)
+        RenderingMode renderingMode = RenderingMode.ClientAndServer, object? globalData = null)
     {
         var component = new Component(componentName, props, renderingMode);
         Components.Add(component);
@@ -118,7 +118,7 @@ public class ReactService : IReactService
             return WrapRenderedStringComponent(string.Empty, component);
         }
 
-        var result = await InvokeRenderTo<string>(component, props, globalContext).ConfigureAwait(false);
+        var result = await InvokeRenderTo<string>(component, props, globalData).ConfigureAwait(false);
 
         return WrapRenderedStringComponent(result, component);
     }
